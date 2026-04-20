@@ -1,0 +1,105 @@
+using GoodHamburger.Core.Entities;
+using GoodHamburger.Core.Interfaces.Repositories;
+using GoodHamburger.Core.Interfaces.Services;
+using GoodHamburger.Core.Services.Shared;
+using DuplicateItemException = GoodHamburger.Core.Exceptions.DuplicateItemException;
+using EntityNotFoundException = GoodHamburger.Core.Exceptions.EntityNotFoundException;
+using InvalidOperationException = GoodHamburger.Core.Exceptions.InvalidOperationException;
+
+namespace GoodHamburger.Core.Services;
+
+public class OrderService : ServiceBase<Order>, IOrderService
+{
+    private readonly IOrderRepository _orderRepository;
+    private readonly IProductRepository _productRepository;
+    private readonly DiscountCalculator _discountCalculator;
+
+    public OrderService(
+        IOrderRepository orderRepository,
+        IProductRepository productRepository,
+        DiscountCalculator discountCalculator) : base(orderRepository)
+    {
+        _orderRepository = orderRepository;
+        _productRepository = productRepository;
+        _discountCalculator = discountCalculator;
+    }
+    
+    public override async Task<Order> CreateAsync(Order entity)
+    {
+        var products = new List<Product>();
+        
+        foreach (var item in entity.Items)
+        {
+            var product = await _productRepository.GetByIdAsync(item.ProductId);
+            if (product == null)
+                throw new EntityNotFoundException("Produto", item.ProductId);
+
+            if (!product.IsActive)
+                throw new InvalidOperationException($"Produto '{product.Name}' não está ativo.");
+
+            item.Product = product;
+            products.Add(product);
+        }
+
+        ValidateDuplicateCategories(products);
+        RecalculateTotals(entity);
+
+        return await base.CreateAsync(entity);
+    }
+
+    public override async Task<Order> UpdateAsync(Order entity)
+    {
+        var existing = await _orderRepository.GetByIdAsync(entity.Id);
+        if (existing == null)
+            throw new EntityNotFoundException("Pedido", entity.Id);
+
+        var products = new List<Product>();
+
+        foreach (var item in entity.Items)
+        {
+            var product = await _productRepository.GetByIdAsync(item.ProductId);
+            if (product == null)
+                throw new EntityNotFoundException("Produto", item.ProductId);
+
+            if (!product.IsActive)
+                throw new InvalidOperationException($"Produto '{product.Name}' não está ativo.");
+
+            item.Product = product;
+            item.OrderId = entity.Id;
+            products.Add(product);
+        }
+
+        ValidateDuplicateCategories(products);
+        RecalculateTotals(entity);
+
+        await base.UpdateAsync(entity);
+        return entity;
+    }
+
+    public override async Task DeleteAsync(int id)
+    {
+        var entity = await _orderRepository.GetByIdAsync(id);
+        if (entity == null)
+            throw new EntityNotFoundException("Pedido", id);
+
+        await base.DeleteAsync(id);
+    }
+
+    private void ValidateDuplicateCategories(IEnumerable<Product> products)
+    {
+        var seenCategories = new HashSet<int>();
+        foreach (var product in products)
+        {
+            if (!seenCategories.Add(product.CategoryId))
+                throw new DuplicateItemException(product.Category?.Name ?? "Desconhecida");
+        }
+    }
+
+    public void RecalculateTotals(Order order)
+    {
+        order.Subtotal = _discountCalculator.CalculateSubtotal(order);
+        var (discount, _) = _discountCalculator.Calculate(order);
+        order.Discount = discount;
+        order.Total = order.Subtotal - discount;
+    }
+}
