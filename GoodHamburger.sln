@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoodHamburger.Core", "GoodH
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoodHamburger.Core.Tests", "GoodHamburger.Core.Tests\GoodHamburger.Core.Tests.csproj", "{EB36D8DD-3C4C-4598-97C0-947EAFB12C53}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoodHamburger.Web", "GoodHamburger.Web\GoodHamburger.Web.csproj", "{FE042BE0-F778-4B6C-846C-C96F743D4800}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -16,6 +18,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{A193AE31-B9E8-40CF-8A66-58B32FE87712} = {5F069673-5D80-446C-92F1-4A46B85276F1}
 		{EB36D8DD-3C4C-4598-97C0-947EAFB12C53} = {C7E71A79-4407-4C92-A975-5E8D36E10685}
+		{FE042BE0-F778-4B6C-846C-C96F743D4800} = {5F069673-5D80-446C-92F1-4A46B85276F1}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A193AE31-B9E8-40CF-8A66-58B32FE87712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -26,5 +29,9 @@ Global
 		{EB36D8DD-3C4C-4598-97C0-947EAFB12C53}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB36D8DD-3C4C-4598-97C0-947EAFB12C53}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB36D8DD-3C4C-4598-97C0-947EAFB12C53}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE042BE0-F778-4B6C-846C-C96F743D4800}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE042BE0-F778-4B6C-846C-C96F743D4800}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE042BE0-F778-4B6C-846C-C96F743D4800}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE042BE0-F778-4B6C-846C-C96F743D4800}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
