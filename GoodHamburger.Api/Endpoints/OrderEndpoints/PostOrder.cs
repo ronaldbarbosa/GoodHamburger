@@ -33,7 +33,7 @@ public static class PostOrder
                         oi.ProductId,
                         oi.Product?.Name ?? "",
                         oi.Product?.Price.ToString() ?? "0",
-                        new ProductCategoryResponse(oi.Product?.Category?.Name ?? "")),
+                        new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name)),
                     oi.Quantity,
                     oi.UnitPrice.ToString())).ToList(),
                 orderResult.Subtotal.ToString(),

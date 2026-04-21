@@ -1,5 +1,7 @@
 using GoodHamburger.Api.Endpoints.OrderEndpoints;
 using GoodHamburger.Api.Endpoints.OrderItemEndpoints;
+using GoodHamburger.Api.Endpoints.ProductCategoryEndpoints;
+using GoodHamburger.Api.Endpoints.ProductEndpoints;
 using GoodHamburger.Api.Models.Responses;
 
 namespace GoodHamburger.Api.Endpoints;
@@ -79,6 +81,46 @@ public static class EndpointsExtensions
             .WithDisplayName("ExcluirPedido")
             .WithDescription("Excluir um pedido")
             .Produces(StatusCodes.Status204NoContent)
+            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
+
+        return app;
+    }
+    
+    public static WebApplication MapProductCategoryEndpoints(this WebApplication app)
+    {
+        var group = app.MapGroup("/api/product-categories")
+            .WithTags("Categorias de Produto");
+
+        group.MapGet("", GetProductCategories.Handle)
+            .WithDisplayName("ListarCategorias")
+            .WithDescription("Listar todas as categorias")
+            .Produces<IEnumerable<ProductCategoryResponse>>()
+            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
+
+        group.MapGet("/{id}", GetProductCategory.Handle)
+            .WithDisplayName("ObterCategoria")
+            .WithDescription("Obter uma categoria pelo id")
+            .Produces<ProductCategoryResponse>()
+            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
+
+        return app;
+    }
+    
+    public static WebApplication MapProductEndpoints(this WebApplication app)
+    {
+        var group = app.MapGroup("/api/products")
+            .WithTags("Cardápio");
+
+        group.MapGet("", GetProducts.Handle)
+            .WithDisplayName("ListarProdutos")
+            .WithDescription("Listar todos os produtos")
+            .Produces<IEnumerable<ProductResponse>>()
+            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
+
+        group.MapGet("/{id}", GetProduct.Handle)
+            .WithDisplayName("ObterProduto")
+            .WithDescription("Obter um produto pelo id")
+            .Produces<ProductResponse>()
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         return app;

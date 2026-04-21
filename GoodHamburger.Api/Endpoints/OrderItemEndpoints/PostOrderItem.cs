@@ -35,7 +35,7 @@ public static class PostOrderItem
                     orderItemResult.ProductId, 
                     orderItemResult.Product!.Name,
                     orderItemResult.Product.Price.ToString(),
-                    new ProductCategoryResponse(orderItemResult.Product.Category!.Name)),
+                    new ProductCategoryResponse(orderItemResult.Product!.CategoryId, orderItemResult.Product!.Category!.Name)),
                 orderItemResult.Quantity,
                 orderItemResult.UnitPrice.ToString());
             

@@ -10,7 +10,7 @@ public class OrderRepository(DataContext context) : RepositoryBase<Order>(contex
 {
     public override async Task<Order?> GetByIdAsync(int id)
     {
-        return await Context.Set<Order>()
+        return await Context.Orders
             .Include(o => o.Items)
             .ThenInclude(oi => oi.Product)
             .ThenInclude(p => p!.Category)
@@ -19,7 +19,7 @@ public class OrderRepository(DataContext context) : RepositoryBase<Order>(contex
 
     public override async Task<IEnumerable<Order>> GetAllAsync()
     {
-        return await Context.Set<Order>()
+        return await Context.Orders
             .AsNoTracking()
             .Include(o => o.Items)
             .ThenInclude(oi => oi.Product)

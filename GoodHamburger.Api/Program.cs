@@ -23,6 +23,8 @@ app.UseHttpsRedirection();
 
 app
     .MapOrderItemEndpoints()
-    .MapOrderEndpoints();
+    .MapOrderEndpoints()
+    .MapProductCategoryEndpoints()
+    .MapProductEndpoints();
 
 app.Run();

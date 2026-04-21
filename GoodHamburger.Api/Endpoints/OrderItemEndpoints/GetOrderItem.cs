@@ -26,7 +26,7 @@ public static class GetOrderItem
                     orderItem.ProductId, 
                     orderItem.Product!.Name,
                     orderItem.Product.Price.ToString(),
-                    new ProductCategoryResponse(orderItem.Product.Category!.Name)),
+                    new ProductCategoryResponse(orderItem.Product!.CategoryId, orderItem.Product!.Category!.Name)),
                 orderItem.Quantity,
                 orderItem.UnitPrice.ToString());
             

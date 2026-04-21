@@ -32,7 +32,7 @@ public static class UpdateOrderItem
                     existingOrderItem.ProductId, 
                     existingOrderItem.Product!.Name,
                     existingOrderItem.Product.Price.ToString(),
-                    new ProductCategoryResponse(existingOrderItem.Product.Category!.Name)),
+                    new ProductCategoryResponse(existingOrderItem.Product!.CategoryId, existingOrderItem.Product!.Category!.Name)),
                 existingOrderItem.Quantity,
                 existingOrderItem.UnitPrice.ToString());
             
