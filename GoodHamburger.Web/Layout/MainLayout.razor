@@ -1,6 +1,10 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+@using GoodHamburger.Web.Services
+@implements IDisposable
+@inject ThemeService ThemeService
+
 @* Required *@
-<MudThemeProvider />
+<MudThemeProvider @bind-IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -9,6 +13,8 @@
     <MudAppBar Elevation="1">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
         <MudText Typo="Typo.h5" Class="ml-3">Good Hamburger</MudText>
+        <MudSpacer />
+        <ThemeToggle />
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
@@ -22,9 +28,28 @@
 
 @code {
     private bool _drawerOpen = true;
+    private bool _isDarkMode;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ThemeService.InitializeAsync();
+        _isDarkMode = ThemeService.IsDarkMode;
+        ThemeService.OnThemeChanged += OnThemeChanged;
+    }
+
+    private void OnThemeChanged()
+    {
+        _isDarkMode = ThemeService.IsDarkMode;
+        StateHasChanged();
+    }
 
     private void ToggleDrawer()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    public void Dispose()
+    {
+        ThemeService.OnThemeChanged -= OnThemeChanged;
     }
 }
