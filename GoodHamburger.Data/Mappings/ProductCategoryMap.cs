@@ -10,8 +10,6 @@ public class ProductCategoryMap : IEntityTypeConfiguration<ProductCategory>
     {
         builder.ToTable("ProductCategories");
         
-        builder.HasKey(pc => pc.Id);
-        
         builder.Property(pc => pc.Name)
             .IsRequired()
             .HasMaxLength(100);

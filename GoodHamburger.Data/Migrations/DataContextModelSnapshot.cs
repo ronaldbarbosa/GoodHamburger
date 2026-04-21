@@ -72,9 +72,6 @@ namespace GoodHamburger.Data.Migrations
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OrderId1")
-                        .HasColumnType("int");
-
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
 
@@ -88,8 +85,6 @@ namespace GoodHamburger.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("OrderId1");
 
                     b.HasIndex("ProductId");
 
@@ -129,6 +124,53 @@ namespace GoodHamburger.Data.Migrations
                     b.HasIndex("IsActive");
 
                     b.ToTable("Products", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CategoryId = 1,
+                            CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "X-Burger",
+                            Price = 15.00m
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CategoryId = 1,
+                            CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "X-Egg",
+                            Price = 17.00m
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CategoryId = 1,
+                            CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "X-Bacon",
+                            Price = 19.00m
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CategoryId = 2,
+                            CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "Batata Frita",
+                            Price = 10.00m
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CategoryId = 2,
+                            CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "Refrigerante",
+                            Price = 5.00m
+                        });
                 });
 
             modelBuilder.Entity("GoodHamburger.Core.Entities.ProductCategory", b =>
@@ -156,19 +198,31 @@ namespace GoodHamburger.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("ProductCategories", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "Sanduíches"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "Acompanhamentos"
+                        });
                 });
 
             modelBuilder.Entity("GoodHamburger.Core.Entities.OrderItem", b =>
                 {
-                    b.HasOne("GoodHamburger.Core.Entities.Order", null)
+                    b.HasOne("GoodHamburger.Core.Entities.Order", "Order")
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("GoodHamburger.Core.Entities.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId1");
 
                     b.HasOne("GoodHamburger.Core.Entities.Product", "Product")
                         .WithMany()

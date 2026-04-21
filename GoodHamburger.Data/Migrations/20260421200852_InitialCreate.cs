@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace GoodHamburger.Data.Migrations
 {
     /// <inheritdoc />
@@ -72,7 +74,6 @@ namespace GoodHamburger.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     OrderId = table.Column<int>(type: "int", nullable: false),
-                    OrderId1 = table.Column<int>(type: "int", nullable: true),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
@@ -87,11 +88,6 @@ namespace GoodHamburger.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_OrderItems_Orders_OrderId1",
-                        column: x => x.OrderId1,
-                        principalTable: "Orders",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_OrderItems_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
@@ -99,15 +95,31 @@ namespace GoodHamburger.Data.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.InsertData(
+                table: "ProductCategories",
+                columns: new[] { "Id", "CreatedAt", "IsActive", "Name" },
+                values: new object[,]
+                {
+                    { 1, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), true, "Sanduíches" },
+                    { 2, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), true, "Acompanhamentos" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Products",
+                columns: new[] { "Id", "CategoryId", "CreatedAt", "IsActive", "Name", "Price" },
+                values: new object[,]
+                {
+                    { 1, 1, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), true, "X-Burger", 15.00m },
+                    { 2, 1, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), true, "X-Egg", 17.00m },
+                    { 3, 1, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), true, "X-Bacon", 19.00m },
+                    { 4, 2, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), true, "Batata Frita", 10.00m },
+                    { 5, 2, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), true, "Refrigerante", 5.00m }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_OrderId",
                 table: "OrderItems",
                 column: "OrderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrderItems_OrderId1",
-                table: "OrderItems",
-                column: "OrderId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_ProductId",

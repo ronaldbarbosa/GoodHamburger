@@ -11,8 +11,6 @@ public class ProductMap : IEntityTypeConfiguration<Product>
     {
         builder.ToTable("Products");
         
-        builder.HasKey(p => p.Id);
-        
         builder.Property(p => p.Name)
             .IsRequired()
             .HasMaxLength(150);

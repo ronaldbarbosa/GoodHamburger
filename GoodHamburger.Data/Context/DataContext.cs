@@ -1,4 +1,7 @@
 using GoodHamburger.Core.Entities;
+using GoodHamburger.Core.ValueObjects;
+using GoodHamburger.Data.Converters;
+using GoodHamburger.Data.Seeders;
 using Microsoft.EntityFrameworkCore;
 
 namespace GoodHamburger.Data.Context;
@@ -20,5 +23,6 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DataContext).Assembly);
+        modelBuilder.SeedData();
     }
 }
