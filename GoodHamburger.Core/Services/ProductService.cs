@@ -1,10 +1,10 @@
 using GoodHamburger.Core.Entities;
+using GoodHamburger.Core.Exceptions;
 using GoodHamburger.Core.Interfaces;
 using GoodHamburger.Core.Interfaces.Repositories;
 using GoodHamburger.Core.Interfaces.Services;
 using GoodHamburger.Core.Services.Shared;
 using EntityNotFoundException = GoodHamburger.Core.Exceptions.EntityNotFoundException;
-using InvalidOperationException = GoodHamburger.Core.Exceptions.InvalidOperationException;
 
 namespace GoodHamburger.Core.Services;
 
@@ -28,7 +28,7 @@ public class ProductService : ServiceBase<Product>, IProductService
             throw new EntityNotFoundException("Categoria", entity.CategoryId);
 
         if (!category.IsActive)
-            throw new InvalidOperationException($"Categoria '{category.Name}' não está ativa.");
+            throw new BusinessRuleViolationException($"Categoria '{category.Name}' não está ativa.");
         
         return await base.CreateAsync(entity);
     }
@@ -46,7 +46,7 @@ public class ProductService : ServiceBase<Product>, IProductService
                 throw new EntityNotFoundException("Categoria", entity.CategoryId);
 
             if (!category.IsActive)
-                throw new InvalidOperationException($"Categoria '{category.Name}' não está ativa.");
+                throw new BusinessRuleViolationException($"Categoria '{category.Name}' não está ativa.");
 
             entity.Category = category;
         }

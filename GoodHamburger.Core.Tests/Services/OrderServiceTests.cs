@@ -87,7 +87,7 @@ public class OrderServiceTests
 
         _productRepositoryMock.Setup(p => p.GetByIdAsync(1)).ReturnsAsync(product);
 
-        await Assert.ThrowsAsync<Core.Exceptions.InvalidOperationException>(() => _orderService.CreateAsync(order));
+        await Assert.ThrowsAsync<Core.Exceptions.BusinessRuleViolationException>(() => _orderService.CreateAsync(order));
     }
 
     [Fact]

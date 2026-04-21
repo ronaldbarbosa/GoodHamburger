@@ -1,10 +1,9 @@
 using GoodHamburger.Core.Entities;
+using GoodHamburger.Core.Exceptions;
 using GoodHamburger.Core.Interfaces;
 using GoodHamburger.Core.Interfaces.Repositories;
 using GoodHamburger.Core.Interfaces.Services;
 using GoodHamburger.Core.Services.Shared;
-using EntityNotFoundException = GoodHamburger.Core.Exceptions.EntityNotFoundException;
-using InvalidOperationException = GoodHamburger.Core.Exceptions.InvalidOperationException;
 
 namespace GoodHamburger.Core.Services;
 
@@ -35,7 +34,7 @@ public class ProductCategoryService : ServiceBase<ProductCategory>, IProductCate
             throw new EntityNotFoundException("Categoria", id);
 
         if (entity.Products.Any())
-            throw new InvalidOperationException($"Categoria '{entity.Name}' possui produtos vinculados.");
+            throw new BusinessRuleViolationException($"Categoria '{entity.Name}' possui produtos vinculados.");
 
         await base.DeleteAsync(id);
     }

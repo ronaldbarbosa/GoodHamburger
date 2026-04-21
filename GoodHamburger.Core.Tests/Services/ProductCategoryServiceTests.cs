@@ -72,7 +72,7 @@ public class ProductCategoryServiceTests
 
         _categoryRepositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(category);
 
-        await Assert.ThrowsAsync<Core.Exceptions.InvalidOperationException>(() => _categoryService.DeleteAsync(1));
+        await Assert.ThrowsAsync<Core.Exceptions.BusinessRuleViolationException>(() => _categoryService.DeleteAsync(1));
     }
 
     [Fact]

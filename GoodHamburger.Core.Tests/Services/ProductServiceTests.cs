@@ -69,7 +69,7 @@ public class ProductServiceTests
 
         _categoryRepositoryMock.Setup(c => c.GetByIdAsync(1)).ReturnsAsync(category);
 
-        await Assert.ThrowsAsync<Core.Exceptions.InvalidOperationException>(() => _productService.CreateAsync(product));
+        await Assert.ThrowsAsync<Core.Exceptions.BusinessRuleViolationException>(() => _productService.CreateAsync(product));
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class ProductServiceTests
         _productRepositoryMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existingProduct);
         _categoryRepositoryMock.Setup(c => c.GetByIdAsync(2)).ReturnsAsync(inactiveCategory);
 
-        await Assert.ThrowsAsync<Core.Exceptions.InvalidOperationException>(() => _productService.UpdateAsync(product));
+        await Assert.ThrowsAsync<Core.Exceptions.BusinessRuleViolationException>(() => _productService.UpdateAsync(product));
     }
 
     [Fact]

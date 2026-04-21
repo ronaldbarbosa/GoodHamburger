@@ -1,9 +1,10 @@
 using GoodHamburger.Core.Entities;
+using GoodHamburger.Core.Interfaces.Services;
 using GoodHamburger.Core.ValueObjects;
 
 namespace GoodHamburger.Core.Services;
 
-public abstract class DiscountCalculator
+public class DiscountCalculator :  IDiscountCalculator
 {
     private const decimal FullDiscount = 0.20m;      // Sandwich + Side + Beverage
     private const decimal SandwichBeverageDiscount = 0.15m;  // Sandwich + Beverage

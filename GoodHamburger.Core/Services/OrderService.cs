@@ -1,10 +1,8 @@
 using GoodHamburger.Core.Entities;
+using GoodHamburger.Core.Exceptions;
 using GoodHamburger.Core.Interfaces.Repositories;
 using GoodHamburger.Core.Interfaces.Services;
 using GoodHamburger.Core.Services.Shared;
-using DuplicateItemException = GoodHamburger.Core.Exceptions.DuplicateItemException;
-using EntityNotFoundException = GoodHamburger.Core.Exceptions.EntityNotFoundException;
-using InvalidOperationException = GoodHamburger.Core.Exceptions.InvalidOperationException;
 
 namespace GoodHamburger.Core.Services;
 
@@ -12,12 +10,12 @@ public class OrderService : ServiceBase<Order>, IOrderService
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IProductRepository _productRepository;
-    private readonly DiscountCalculator _discountCalculator;
+    private readonly IDiscountCalculator _discountCalculator;
 
     public OrderService(
         IOrderRepository orderRepository,
         IProductRepository productRepository,
-        DiscountCalculator discountCalculator) : base(orderRepository)
+        IDiscountCalculator discountCalculator) : base(orderRepository)
     {
         _orderRepository = orderRepository;
         _productRepository = productRepository;
@@ -35,7 +33,7 @@ public class OrderService : ServiceBase<Order>, IOrderService
                 throw new EntityNotFoundException("Produto", item.ProductId);
 
             if (!product.IsActive)
-                throw new InvalidOperationException($"Produto '{product.Name}' não está ativo.");
+                throw new BusinessRuleViolationException($"Produto '{product.Name}' não está ativo.");
 
             item.Product = product;
             products.Add(product);
@@ -62,7 +60,7 @@ public class OrderService : ServiceBase<Order>, IOrderService
                 throw new EntityNotFoundException("Produto", item.ProductId);
 
             if (!product.IsActive)
-                throw new InvalidOperationException($"Produto '{product.Name}' não está ativo.");
+                throw new BusinessRuleViolationException($"Produto '{product.Name}' não está ativo.");
 
             item.Product = product;
             item.OrderId = entity.Id;
