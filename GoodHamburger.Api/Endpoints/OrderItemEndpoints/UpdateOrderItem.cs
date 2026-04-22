@@ -1,6 +1,7 @@
 using GoodHamburger.Api.Models.Requests;
 using GoodHamburger.Api.Models.Responses;
 using GoodHamburger.Core.Entities;
+using GoodHamburger.Core.Exceptions;
 using GoodHamburger.Core.Interfaces.Services;
 
 namespace GoodHamburger.Api.Endpoints.OrderItemEndpoints;
@@ -38,6 +39,21 @@ public static class UpdateOrderItem
                 existingOrderItem.UnitPrice.ToString());
             
             return Results.Ok(response);
+        }
+        catch (EntityNotFoundException ex)
+        {
+            var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
+            return Results.BadRequest(validation);
+        }
+        catch (InvalidItemQuantityException ex)
+        {
+            var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
+            return Results.BadRequest(validation);
+        }
+        catch (Exception ex) when(ex is DuplicateItemException or BusinessRuleViolationException)
+        {
+            var validation = new ValidationResponse([new ValidationItemResponse("", ex.Message)]);
+            return Results.BadRequest(validation);
         }
         catch (Exception)
         {

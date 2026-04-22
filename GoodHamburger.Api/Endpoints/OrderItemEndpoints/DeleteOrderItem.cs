@@ -23,7 +23,7 @@ public static class DeleteOrderItem
             
             return Results.NoContent();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }

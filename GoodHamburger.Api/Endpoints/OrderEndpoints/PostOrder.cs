@@ -49,6 +49,11 @@ public static class PostOrder
             var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
             return Results.BadRequest(validation);
         }
+        catch (InvalidItemQuantityException ex)
+        {
+            var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
+            return Results.BadRequest(validation);
+        }
         catch (Exception ex) when(ex is DuplicateItemException or BusinessRuleViolationException)
         {
             var validation = new ValidationResponse([new ValidationItemResponse("", ex.Message)]);

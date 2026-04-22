@@ -14,15 +14,9 @@ public static class PostOrderItem
     {
         try
         {
-            if (request.OrderId is null)
-            {
-                var validation = new ValidationResponse([new ValidationItemResponse("orderId", "É necessário informar o id do pedido")]);
-                return Results.BadRequest(validation);
-            }
-            
             var orderItem = new OrderItem
             {
-                OrderId = (int)request.OrderId,
+                OrderId = request.OrderId,
                 ProductId = request.ProductId,
                 Quantity = request.Quantity
             };
@@ -42,6 +36,11 @@ public static class PostOrderItem
             return Results.Created($"/api/order-items/{orderItemResult.Id}", response);
         }
         catch (EntityNotFoundException ex)
+        {
+            var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
+            return Results.BadRequest(validation);
+        }
+        catch (InvalidItemQuantityException ex)
         {
             var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
             return Results.BadRequest(validation);

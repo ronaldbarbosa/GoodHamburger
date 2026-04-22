@@ -1,5 +1,6 @@
 using GoodHamburger.Api.Endpoints;
 using GoodHamburger.Api.IoC;
+using GoodHamburger.Api.Middleware;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowBlazor");
+app.UseGlobalExceptionHandler();
 app.UseHttpsRedirection();
 
 app

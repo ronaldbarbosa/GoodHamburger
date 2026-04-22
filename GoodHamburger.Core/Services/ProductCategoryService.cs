@@ -9,16 +9,16 @@ namespace GoodHamburger.Core.Services;
 
 public class ProductCategoryService : ServiceBase<ProductCategory>, IProductCategoryService
 {
-    private readonly IProductCategoryRepository _repository;
+    private readonly IProductCategoryRepository _orderItemRepository;
 
-    public ProductCategoryService(IProductCategoryRepository repository) : base(repository)
+    public ProductCategoryService(IProductCategoryRepository orderItemRepository) : base(orderItemRepository)
     {
-        _repository = repository;
+        _orderItemRepository = orderItemRepository;
     }
 
     public override async Task<ProductCategory> UpdateAsync(ProductCategory entity)
     {
-        var existing = await _repository.GetByIdAsync(entity.Id);
+        var existing = await _orderItemRepository.GetByIdAsync(entity.Id);
         if (existing == null)
             throw new EntityNotFoundException("Categoria", entity.Id);
 
@@ -29,7 +29,7 @@ public class ProductCategoryService : ServiceBase<ProductCategory>, IProductCate
 
     public override async Task DeleteAsync(int id)
     {
-        var entity = await _repository.GetByIdAsync(id);
+        var entity = await _orderItemRepository.GetByIdAsync(id);
         if (entity == null)
             throw new EntityNotFoundException("Categoria", id);
 

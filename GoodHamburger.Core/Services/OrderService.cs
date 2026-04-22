@@ -8,16 +8,16 @@ namespace GoodHamburger.Core.Services;
 
 public class OrderService : ServiceBase<Order>, IOrderService
 {
-    private readonly IOrderRepository _orderRepository;
+    private readonly IOrderRepository _orderOrderItemRepository;
     private readonly IProductRepository _productRepository;
     private readonly IDiscountCalculator _discountCalculator;
 
     public OrderService(
-        IOrderRepository orderRepository,
+        IOrderRepository orderOrderItemRepository,
         IProductRepository productRepository,
-        IDiscountCalculator discountCalculator) : base(orderRepository)
+        IDiscountCalculator discountCalculator) : base(orderOrderItemRepository)
     {
-        _orderRepository = orderRepository;
+        _orderOrderItemRepository = orderOrderItemRepository;
         _productRepository = productRepository;
         _discountCalculator = discountCalculator;
     }
@@ -40,6 +40,7 @@ public class OrderService : ServiceBase<Order>, IOrderService
         }
 
         ValidateDuplicateCategories(products);
+        ValidateProductQuantity(entity.Items);
         RecalculateTotals(entity);
 
         return await base.CreateAsync(entity);
@@ -47,7 +48,7 @@ public class OrderService : ServiceBase<Order>, IOrderService
 
     public override async Task<Order> UpdateAsync(Order entity)
     {
-        var existing = await _orderRepository.GetByIdAsync(entity.Id);
+        var existing = await _orderOrderItemRepository.GetByIdAsync(entity.Id);
         if (existing == null)
             throw new EntityNotFoundException("Pedido", entity.Id);
 
@@ -68,6 +69,7 @@ public class OrderService : ServiceBase<Order>, IOrderService
         }
 
         ValidateDuplicateCategories(products);
+        ValidateProductQuantity(entity.Items);
         RecalculateTotals(entity);
 
         await base.UpdateAsync(entity);
@@ -76,14 +78,14 @@ public class OrderService : ServiceBase<Order>, IOrderService
 
     public override async Task DeleteAsync(int id)
     {
-        var entity = await _orderRepository.GetByIdAsync(id);
+        var entity = await _orderOrderItemRepository.GetByIdAsync(id);
         if (entity == null)
             throw new EntityNotFoundException("Pedido", id);
 
         await base.DeleteAsync(id);
     }
 
-    private void ValidateDuplicateCategories(IEnumerable<Product> products)
+    public void ValidateDuplicateCategories(IEnumerable<Product> products)
     {
         var seenCategories = new HashSet<int>();
         foreach (var product in products)
@@ -91,6 +93,12 @@ public class OrderService : ServiceBase<Order>, IOrderService
             if (!seenCategories.Add(product.CategoryId))
                 throw new DuplicateItemException(product.Category?.Name ?? "Desconhecida");
         }
+    }
+
+    public void ValidateProductQuantity(IEnumerable<OrderItem> orderItems)
+    {
+        if (orderItems.Any(i => i.Quantity < 1))
+            throw new InvalidItemQuantityException();
     }
 
     public void RecalculateTotals(Order order)

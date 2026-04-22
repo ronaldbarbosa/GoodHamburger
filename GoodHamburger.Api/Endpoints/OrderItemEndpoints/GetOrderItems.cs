@@ -25,7 +25,7 @@ public static class GetOrderItems
             
             return Results.Ok(response);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }
