@@ -18,8 +18,8 @@ public static class GetOrders
                     oi.Id,
                     new ProductResponse(
                         oi.ProductId,
-                        oi.Product?.Name ?? "",
-                        oi.Product?.Price.ToString() ?? "0",
+                        oi.Product!.Name,
+                        oi.Product!.Price.ToString(),
                         new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name)),
                     oi.Quantity,
                     oi.UnitPrice.ToString())).ToList(),
@@ -33,7 +33,7 @@ public static class GetOrders
         }
         catch (Exception)
         {
-            return Results.InternalServerError("Erro ao processar solicitação. Tente novamente em alguns instantes.");
+            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }
     }
 }

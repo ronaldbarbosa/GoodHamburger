@@ -15,7 +15,8 @@ public static class GetProduct
             
             if (product is null)
             {
-                return Results.NotFound(new { message = "Produto não encontrado" });
+                var validation = new ValidationResponse([new ValidationItemResponse("orderId", "Produto não  encontrado.")]);
+                return Results.NotFound(validation);
             }
             
             var response = new ProductResponse(
@@ -28,7 +29,7 @@ public static class GetProduct
         }
         catch (Exception)
         {
-            return Results.InternalServerError("Erro ao processar solicitação. Tente novamente em alguns instantes.");
+            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }
     }
 }

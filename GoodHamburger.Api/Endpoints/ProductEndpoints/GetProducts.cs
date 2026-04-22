@@ -21,7 +21,7 @@ public static class GetProducts
         }
         catch (Exception)
         {
-            return Results.InternalServerError("Erro ao processar solicitação. Tente novamente em alguns instantes.");
+            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }
     }
 }

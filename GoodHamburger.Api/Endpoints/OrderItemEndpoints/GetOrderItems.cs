@@ -20,13 +20,14 @@ public static class GetOrderItems
                     oi.Product.Price.ToString(),
                     new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name)),
                 oi.Quantity,
-                oi.UnitPrice.ToString()));
+                oi.UnitPrice.ToString()))
+                .ToList();
             
             return Results.Ok(response);
         }
         catch (Exception ex)
         {
-            return Results.InternalServerError("Erro ao processar solicitação. Tente novamente em alguns instantes.");
+            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }
     }
 }

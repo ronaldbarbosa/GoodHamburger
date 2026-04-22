@@ -11,13 +11,14 @@ public static class GetProductCategories
         {
             var categories = await productCategoryService.GetAllAsync();
             
-            var response = categories.Select(c => new ProductCategoryResponse(c.Id, c.Name));
+            var response = 
+                categories.Select(c => new ProductCategoryResponse(c.Id, c.Name));
             
             return Results.Ok(response);
         }
         catch (Exception)
         {
-            return Results.InternalServerError("Erro ao processar solicitação. Tente novamente em alguns instantes.");
+            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }
     }
 }

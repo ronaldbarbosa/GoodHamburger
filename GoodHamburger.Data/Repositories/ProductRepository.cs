@@ -10,14 +10,15 @@ public class ProductRepository(DataContext context) : RepositoryBase<Product>(co
 {
     public override async Task<Product?> GetByIdAsync(int id)
     {
-        return await context.Products
+        return await Context.Products
             .Include(p => p.Category)
             .SingleOrDefaultAsync(o => o.Id == id);
     }
 
     public override async Task<IEnumerable<Product>> GetAllAsync()
     {
-        return await  context.Products
+        return await  Context.Products
+            .AsNoTracking()
             .Include(p => p.Category)
             .ToListAsync();
     }

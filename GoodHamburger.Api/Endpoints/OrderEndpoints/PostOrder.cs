@@ -31,8 +31,8 @@ public static class PostOrder
                     oi.Id,
                     new ProductResponse(
                         oi.ProductId,
-                        oi.Product?.Name ?? "",
-                        oi.Product?.Price.ToString() ?? "0",
+                        oi.Product!.Name,
+                        oi.Product!.Price.ToString(),
                         new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name)),
                     oi.Quantity,
                     oi.UnitPrice.ToString())).ToList(),
@@ -52,11 +52,11 @@ public static class PostOrder
         catch (Exception ex) when(ex is DuplicateItemException or BusinessRuleViolationException)
         {
             var validation = new ValidationResponse([new ValidationItemResponse("", ex.Message)]);
-            return Results.BadRequest(ex.Message);
+            return Results.BadRequest(validation);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return Results.InternalServerError("Erro ao processar solicitação. Tente novamente em alguns instantes.");
+            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }
     }
 }

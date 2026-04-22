@@ -44,16 +44,16 @@ public static class PostOrderItem
         catch (EntityNotFoundException ex)
         {
             var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
-            return Results.BadRequest(ex.Message);
+            return Results.BadRequest(validation);
         }
         catch (Exception ex) when(ex is DuplicateItemException or BusinessRuleViolationException)
         {
             var validation = new ValidationResponse([new ValidationItemResponse("", ex.Message)]);
-            return Results.BadRequest(ex.Message);
+            return Results.BadRequest(validation);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return Results.InternalServerError("Erro ao processar solicitação. Tente novamente em alguns instantes.");
+            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }
     }
 }

@@ -15,7 +15,8 @@ public static class GetProductCategory
             
             if (category is null)
             {
-                return Results.NotFound(new { message = "Categoria não encontrada" });
+                var validation = new ValidationResponse([new ValidationItemResponse("id", "Categoria não encontrada.")]);
+                return Results.NotFound(validation);
             }
             
             var response = new ProductCategoryResponse(category.Id, category.Name);
@@ -24,7 +25,7 @@ public static class GetProductCategory
         }
         catch (Exception)
         {
-            return Results.InternalServerError("Erro ao processar solicitação. Tente novamente em alguns instantes.");
+            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }
     }
 }

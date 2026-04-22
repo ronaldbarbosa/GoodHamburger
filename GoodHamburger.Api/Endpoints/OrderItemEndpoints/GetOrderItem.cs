@@ -17,7 +17,8 @@ public static class GetOrderItem
             
             if (orderItem is null)
             {
-                return Results.NotFound(new { message = "Item de pedido não encontrado" });
+                var validation = new ValidationResponse([new ValidationItemResponse("id", "Item do pedido não foi encontrado.")]);
+                return Results.NotFound(validation);
             }
             
             var response = new OrderItemResponse(
@@ -34,7 +35,7 @@ public static class GetOrderItem
         }
         catch (Exception ex)
         {
-            return Results.InternalServerError("Erro ao processar solicitação. Tente novamente em alguns instantes.");
+            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }
     }
 }

@@ -1,3 +1,4 @@
+using GoodHamburger.Api.Models.Responses;
 using GoodHamburger.Core.Interfaces.Services;
 
 namespace GoodHamburger.Api.Endpoints.OrderEndpoints;
@@ -14,7 +15,8 @@ public static class DeleteOrder
             
             if (existingOrder is null)
             {
-                return Results.NotFound(new { message = "Pedido não encontrado" });
+                var validation = new ValidationResponse([new ValidationItemResponse("id", "Pedido não encontrado.")]);
+                return Results.NotFound(validation);
             }
             
             await orderService.DeleteAsync(id);
@@ -23,7 +25,7 @@ public static class DeleteOrder
         }
         catch (Exception)
         {
-            return Results.InternalServerError("Erro ao processar solicitação. Tente novamente em alguns instantes.");
+            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }
     }
 }

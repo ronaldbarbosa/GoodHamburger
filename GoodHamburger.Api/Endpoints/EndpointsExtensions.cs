@@ -30,18 +30,22 @@ public static class EndpointsExtensions
             .WithDisplayName("ObterItemPedido")
             .WithDescription("Obter um item de pedido pelo id")
             .Produces<OrderItemResponse>()
+            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         group.MapPut("/{id}", UpdateOrderItem.Handle)
             .WithDisplayName("AtualizarItemPedido")
             .WithDescription("Atualizar um item de pedido")
             .Produces<OrderItemResponse>()
+            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
+            .Produces<ValidationResponse>(StatusCodes.Status400BadRequest)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         group.MapDelete("/{id}", DeleteOrderItem.Handle)
             .WithDisplayName("ExcluirItemPedido")
             .WithDescription("Excluir um item de pedido")
             .Produces(StatusCodes.Status204NoContent)
+            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         return app;
@@ -69,18 +73,22 @@ public static class EndpointsExtensions
             .WithDisplayName("ObterPedido")
             .WithDescription("Obter um pedido pelo id")
             .Produces<OrderResponse>()
+            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         group.MapPut("/{id}", UpdateOrder.Handle)
             .WithDisplayName("AtualizarPedido")
             .WithDescription("Atualizar um pedido")
             .Produces<OrderResponse>()
+            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
+            .Produces<ValidationResponse>(StatusCodes.Status400BadRequest)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         group.MapDelete("/{id}", DeleteOrder.Handle)
             .WithDisplayName("ExcluirPedido")
             .WithDescription("Excluir um pedido")
             .Produces(StatusCodes.Status204NoContent)
+            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         return app;
@@ -101,6 +109,7 @@ public static class EndpointsExtensions
             .WithDisplayName("ObterCategoria")
             .WithDescription("Obter uma categoria pelo id")
             .Produces<ProductCategoryResponse>()
+            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         return app;
@@ -121,6 +130,7 @@ public static class EndpointsExtensions
             .WithDisplayName("ObterProduto")
             .WithDescription("Obter um produto pelo id")
             .Produces<ProductResponse>()
+            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         return app;

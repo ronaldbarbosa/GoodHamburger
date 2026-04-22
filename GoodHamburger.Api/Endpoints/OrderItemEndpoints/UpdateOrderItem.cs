@@ -18,7 +18,8 @@ public static class UpdateOrderItem
             
             if (existingOrderItem is null)
             {
-                return Results.NotFound(new { message = "Item de pedido não encontrado" });
+                var validation = new ValidationResponse([new ValidationItemResponse("id", "Item do pedido não foi encontrado.")]);
+                return Results.NotFound(validation);
             }
             
             existingOrderItem.Quantity = request.Quantity;
@@ -38,9 +39,9 @@ public static class UpdateOrderItem
             
             return Results.Ok(response);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return Results.InternalServerError("Erro ao processar solicitação. Tente novamente em alguns instantes.");
+            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
         }
     }
 }
