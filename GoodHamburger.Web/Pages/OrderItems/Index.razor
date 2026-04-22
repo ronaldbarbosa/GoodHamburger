@@ -1,0 +1,44 @@
+@page "/order-items"
+@inject OrderItemService OrderItemService
+
+<PageTitle>Itens do Pedido</PageTitle>
+
+<h1>Itens do Pedido</h1>
+
+@if (orderItems is null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in orderItems)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Product.Name</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.UnitPrice</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<OrderItemResponse>? orderItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orderItems = await OrderItemService.GetAllAsync();
+    }
+}

@@ -91,6 +91,14 @@ public static class EndpointsExtensions
             .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
+        group.MapPatch("/{id}/confirm", ConfirmOrder.Handle)
+            .WithDisplayName("ConfirmarPedido")
+            .WithDescription("Confirmar um pedido pendente")
+            .Produces<OrderResponse>()
+            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
+            .Produces<ValidationResponse>(StatusCodes.Status400BadRequest)
+            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
+
         return app;
     }
     

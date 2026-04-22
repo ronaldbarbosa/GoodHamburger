@@ -5,6 +5,10 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.Services.AddCors(options => options.AddPolicy("AllowBlazor", policy =>
+    policy.AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader()));
 
 builder.Services.RegisterServices(builder.Configuration);
 
@@ -19,6 +23,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseCors("AllowBlazor");
 app.UseHttpsRedirection();
 
 app

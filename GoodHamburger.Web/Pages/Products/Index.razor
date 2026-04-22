@@ -1,0 +1,89 @@
+@page "/products"
+@inject ProductService ProductService
+@inject ProductCategoryService ProductCategoryService
+@inject CartService CartService
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+
+<PageTitle>Cardápio</PageTitle>
+
+<MudText Typo="Typo.h4" Class="mb-4">Cardápio</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="6" md="4">
+        <MudSelect T="int?" Label="Filtrar por Categoria" Placeholder="Todas" ValueChanged="OnCategoryChanged" Variant="Variant.Outlined" Margin="Margin.Dense">
+            <MudSelectItem T="int?" Value="null">Todas</MudSelectItem>
+            @foreach (var category in categories)
+            {
+                <MudSelectItem T="int?" Value="category.Id">@category.Name</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+</MudGrid>
+
+<MudGrid Class="mt-4">
+    @foreach (var product in filteredProducts)
+    {
+        <MudItem xs="12" sm="4" md="3" lg="2">
+            <MudCard>
+                <MudCardMedia Image="@GetProductImage(product.Category.Name)" Height="140" />
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">@product.Name</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Default">@product.Category.Name</MudText>
+                    <MudText Typo="Typo.h6" Color="Color.Primary" Class="mt-2">@product.Price</MudText>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" StartIcon="@Icons.Material.Filled.AddShoppingCart" OnClick="() => AddToCart(product)">
+                        Adicionar
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    }
+</MudGrid>
+
+@if (!filteredProducts.Any())
+{
+    <MudText Class="mt-4">Nenhum produto encontrado.</MudText>
+}
+
+@code {
+    private List<ProductResponse> products = [];
+    private List<ProductResponse> filteredProducts = [];
+    private List<ProductCategoryResponse> categories = [];
+    private int? selectedCategoryId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await ProductService.GetAllAsync();
+        categories = await ProductCategoryService.GetAllAsync();
+        filteredProducts = products;
+    }
+
+    private void OnCategoryChanged(int? categoryId)
+    {
+        selectedCategoryId = categoryId;
+        filteredProducts = categoryId is null
+            ? products
+            : products.Where(p => p.Category.Id == categoryId).ToList();
+    }
+
+    private string GetProductImage(string categoryName)
+    {
+        return "https://upload.wikimedia.org/wikipedia/commons/b/b0/Hamburger_%2812164386105%29.jpg";
+        // return categoryName.ToLower() switch
+        // {
+        //     "lanche" => "Images/hamburger.png",
+        //     "bebida" => "Images/drink.png",
+        //     "acompanhamento" => "Images/sides.png",
+        //     "sobremesa" => "Images/dessert.png",
+        //     _ => "Images/food.png"
+        // };
+    }
+
+    private async Task AddToCart(ProductResponse product)
+    {
+        await CartService.AddItemAsync(Http, product.Id, product.Name, product.Category.Name, 1, product.Price);
+        Snackbar.Add($"{product.Name} adicionado ao carrinho!", Severity.Success);
+    }
+}

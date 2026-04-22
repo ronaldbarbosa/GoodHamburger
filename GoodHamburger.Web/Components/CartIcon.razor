@@ -1,0 +1,81 @@
+@using GoodHamburger.Web.Services
+@inject CartService CartService
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+
+@if (CartService.IsInitialized)
+{
+    <MudBadge Content="CartService.ItemCount" Color="Color.Primary" Overlap="true" Bordered="true">
+        <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" OnClick="OpenCartDialog" />
+    </MudBadge>
+}
+
+<MudDialog @bind-IsVisible="dialogVisible" MaxWidth="MaxWidth.Small" FullWidth="true">
+    <DialogContent>
+        <MudText Typo="Typo.h5" Class="mb-4">Carrinho</MudText>
+        
+        @if (!CartService.Items.Any())
+        {
+            <MudText Color="Color.Default">Seu carrinho está vazio.</MudText>
+        }
+        else
+        {
+            <MudList T="CartItem">
+                @foreach (var item in CartService.Items)
+                {
+                    <MudListItem>
+                        <MudGrid>
+                            <MudItem xs="8">
+                                <MudText>@item.ProductName</MudText>
+                            </MudItem>
+                            <MudItem xs="4" Style="text-align: right;">
+                                <MudText>x @item.Quantity</MudText>
+                            </MudItem>
+                        </MudGrid>
+                    </MudListItem>
+                }
+            </MudList>
+            
+            <MudDivider Class="my-2" />
+            
+            <MudText Typo="Typo.h6">
+                Total: @(CartService.CurrentCart?.Total ?? "R$ 0,00")
+            </MudText>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="CloseDialog">Fechar</MudButton>
+        @if (CartService.Items.Any())
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="ConfirmCart">
+                Confirmar Pedido
+            </MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private bool dialogVisible;
+
+    protected override void OnInitialized()
+    {
+        CartService.OnCartChanged += () => StateHasChanged();
+    }
+
+    private void OpenCartDialog()
+    {
+        dialogVisible = true;
+    }
+
+    private void CloseDialog()
+    {
+        dialogVisible = false;
+    }
+
+    private async Task ConfirmCart()
+    {
+        await CartService.ConfirmCartAsync(Http);
+        Snackbar.Add("Pedido confirmado com sucesso!", Severity.Success);
+        CloseDialog();
+    }
+}

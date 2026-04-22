@@ -1,0 +1,136 @@
+@page "/cart"
+@inject CartService CartService
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<PageTitle>Carrinho</PageTitle>
+
+@if (!CartService.IsInitialized)
+{
+    <MudText>Carregando...</MudText>
+}
+else if (!CartService.Items.Any())
+{
+    <MudPaper Class="pa-8" Style="text-align: center;">
+        <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Size="Size.Large" Color="Color.Default" />
+        <MudText Typo="Typo.h6" Class="mt-4">Seu carrinho está vazio</MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" Href="/products">
+            Ver Cardápio
+        </MudButton>
+    </MudPaper>
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12" md="8">
+            @foreach (var item in CartService.Items)
+            {
+                <MudPaper Class="pa-3 mb-2">
+                    <MudGrid>
+                        <MudItem xs="2">
+                            <MudImage Src="@GetProductImage(item.CategoryName)" Height="80" Width="80" ObjectFit="ObjectFit.Cover" />
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudText Typo="Typo.h6">@item.ProductName</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Default">@item.UnitPrice</MudText>
+                        </MudItem>
+                        <MudItem xs="4" Style="text-align: right;">
+                            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                                <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small" OnClick="() => DecrementQuantity(item)" Disabled="item.Quantity <= 1" />
+                                <MudText Typo="Typo.h6">@item.Quantity</MudText>
+                                <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="() => IncrementQuantity(item)" />
+                            </div>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="() => RemoveItem(item)" Class="mt-2" />
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+            }
+        </MudItem>
+        
+        <MudItem xs="12" md="4">
+            <MudPaper Class="pa-4">
+                <MudText Typo="Typo.h5" Class="mb-4">Resumo</MudText>
+                <MudDivider Class="mb-4" />
+                
+                <MudGrid>
+                    <MudItem xs="8">
+                        <MudText>Subtotal</MudText>
+                    </MudItem>
+                    <MudItem xs="4" Style="text-align: right;">
+                        <MudText>@(CartService.CurrentCart?.Subtotal ?? "R$ 0,00")</MudText>
+                    </MudItem>
+                    
+                    <MudItem xs="8">
+                        <MudText>Desconto</MudText>
+                    </MudItem>
+                    <MudItem xs="4" Style="text-align: right;">
+                        <MudText>@(CartService.CurrentCart?.Discount ?? "R$ 0,00")</MudText>
+                    </MudItem>
+                    
+                    <MudItem xs="8">
+                        <MudText Typo="Typo.h6">Total</MudText>
+                    </MudItem>
+                    <MudItem xs="4" Style="text-align: right;">
+                        <MudText Typo="Typo.h6">@(CartService.CurrentCart?.Total ?? "R$ 0,00")</MudText>
+                    </MudItem>
+                </MudGrid>
+                
+                <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth="true" Class="mt-4" OnClick="ConfirmCart">
+                    Confirmar Pedido
+                </MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        CartService.OnInitialized += () =>
+        {
+            CartService.OnCartChanged += () => StateHasChanged();
+            StateHasChanged();
+        };
+        CartService.OnCartChanged += () => StateHasChanged();
+    }
+
+    private string GetProductImage(string categoryName)
+    {
+        return "https://upload.wikimedia.org/wikipedia/commons/b/b0/Hamburger_%2812164386105%29.jpg";
+        // return categoryName.ToLower() switch
+        // {
+        //     "lanche" => "Images/hamburger.png",
+        //     "bebida" => "Images/drink.png",
+        //     "acompanhamento" => "Images/sides.png",
+        //     "sobremesa" => "Images/dessert.png",
+        //     _ => "Images/food.png"
+        // };
+    }
+
+    private async Task IncrementQuantity(CartItem item)
+    {
+        await CartService.UpdateQuantityAsync(Http, item.Id, item.Quantity + 1);
+    }
+
+    private async Task DecrementQuantity(CartItem item)
+    {
+        if (item.Quantity > 1)
+        {
+            await CartService.UpdateQuantityAsync(Http, item.Id, item.Quantity - 1);
+        }
+    }
+
+    private async Task RemoveItem(CartItem item)
+    {
+        await CartService.RemoveItemAsync(Http, item.Id);
+        Snackbar.Add($"{item.ProductName} removido do carrinho!", Severity.Warning);
+    }
+
+    private async Task ConfirmCart()
+    {
+        await CartService.ConfirmCartAsync(Http);
+        Snackbar.Add("Pedido confirmado com sucesso!", Severity.Success);
+        Navigation.NavigateTo("/orders");
+    }
+}

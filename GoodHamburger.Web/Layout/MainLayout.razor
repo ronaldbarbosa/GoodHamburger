@@ -1,10 +1,14 @@
 @inherits LayoutComponentBase
 @using GoodHamburger.Web.Services
+@using GoodHamburger.Web.Themes
+@using GoodHamburger.Web.Components
 @implements IDisposable
 @inject ThemeService ThemeService
+@inject CartService CartService
+@inject HttpClient Http
 
 @* Required *@
-<MudThemeProvider @bind-IsDarkMode="_isDarkMode" />
+<MudThemeProvider @bind-IsDarkMode="_isDarkMode" Theme="CustomTheme.CustomMudTheme()" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -14,6 +18,7 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
         <MudText Typo="Typo.h5" Class="ml-3">Good Hamburger</MudText>
         <MudSpacer />
+        <CartIcon />
         <ThemeToggle />
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
@@ -35,6 +40,8 @@
         await ThemeService.InitializeAsync();
         _isDarkMode = ThemeService.IsDarkMode;
         ThemeService.OnThemeChanged += OnThemeChanged;
+        
+        await CartService.InitializeAsync(Http);
     }
 
     private void OnThemeChanged()
