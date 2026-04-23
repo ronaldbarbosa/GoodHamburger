@@ -17,9 +17,9 @@ public class DiscountCalculator :  IDiscountCalculator
             .Select(i => i.Product!.Category!.Name.ToLowerInvariant())
             .ToHashSet();
 
-        bool hasSandwich = categories.Contains("sandwich");
-        bool hasSide = categories.Contains("side");
-        bool hasBeverage = categories.Contains("beverage");
+        bool hasSandwich = categories.Contains("sanduíches");
+        bool hasSide = categories.Contains("acompanhamentos");
+        bool hasBeverage = categories.Contains("bebidas");
 
         decimal discountRate = 0m;
         string rule = "Sem desconto";
@@ -48,7 +48,7 @@ public class DiscountCalculator :  IDiscountCalculator
     {
         var total = order.Items
             .Where(i => i.Product != null)
-            .Sum(i => i.Product!.Price.Amount);
+            .Sum(i => i.Product!.Price.Amount * i.Quantity);
 
         return new Money(total);
     }
