@@ -1,5 +1,4 @@
 @page "/products"
-@using GoodHamburger.Web.Models
 @implements IDisposable
 @inject ProductService ProductService
 @inject ProductCategoryService ProductCategoryService
@@ -86,7 +85,7 @@
 
     private async Task AddToCartAsync(ProductResponse product)
     {
-        var added = await CartService.AddItemAsync(Http, product.Id, product.Name, product.Category.Name, 1, product.Price);
+        var added = await CartService.AddItemAsync(Http, product.Id, product.Name, product.Category.Name, 1, product.Price, product.ImageUrl);
         if (added)
             Snackbar.Add($"{product.Name} adicionado ao carrinho!", Severity.Success);
         else

@@ -1,5 +1,4 @@
 @page "/cart"
-@using GoodHamburger.Web.Models
 @inject CartService CartService
 @inject HttpClient Http
 @inject ISnackbar Snackbar
@@ -30,7 +29,7 @@ else
                 <MudPaper Class="pa-3 mb-2">
                     <MudGrid>
                         <MudItem xs="2">
-                            <MudImage Src="@GetProductImage(item.CategoryName)" Height="80" Width="80" ObjectFit="ObjectFit.Cover" />
+                            <MudImage Src="@item.ImageUrl" Height="80" Width="80" ObjectFit="ObjectFit.Cover" />
                         </MudItem>
                         <MudItem xs="6">
                             <MudText Typo="Typo.h6">@item.ProductName</MudText>
@@ -89,19 +88,6 @@ else
             StateHasChanged();
         };
         CartService.OnCartChanged += () => StateHasChanged();
-    }
-
-    private string GetProductImage(string categoryName)
-    {
-        return "https://upload.wikimedia.org/wikipedia/commons/b/b0/Hamburger_%2812164386105%29.jpg";
-        // return categoryName.ToLower() switch
-        // {
-        //     "lanche" => "Images/hamburger.png",
-        //     "bebida" => "Images/drink.png",
-        //     "acompanhamento" => "Images/sides.png",
-        //     "sobremesa" => "Images/dessert.png",
-        //     _ => "Images/food.png"
-        // };
     }
 
     private async Task RemoveItem(CartItem item)

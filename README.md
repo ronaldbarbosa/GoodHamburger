@@ -26,7 +26,7 @@ Sistema de pedidos de uma hamburgueria, desenvolvido como desafio técnico. Perm
 | ORM | Entity Framework Core 10 |
 | Banco de dados | SQL Server |
 | Documentação | Scalar (OpenAPI) |
-| Testes | xUnit + Moq |
+| Testes | xUnit + Moq | 
 
 ---
 
@@ -145,6 +145,12 @@ Edite `GoodHamburger.Api/appsettings.Development.json` com a string de conexão 
 ## Como Executar
 
 ### 1. Banco de dados
+
+Execute para a instalação dos pacotes necessários:
+```bash
+dotnet restore
+```
+
 
 Aplique as migrations para criar o schema e popular os dados iniciais (categorias e produtos):
 
