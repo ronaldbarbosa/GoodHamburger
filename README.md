@@ -14,6 +14,7 @@ Sistema de pedidos de uma hamburgueria, desenvolvido como desafio técnico. Perm
 - [Como Executar](#como-executar)
 - [Endpoints da API](#endpoints-da-api)
 - [Testes](#testes)
+- [Melhorias Não Implementadas](#melhorias-não-implementadas)
 
 ---
 
@@ -231,6 +232,52 @@ dotnet test
 | Projeto | Cobertura |
 |---------|-----------|
 | `GoodHamburger.Core.Tests` | `DiscountCalculatorService`, `OrderService`, `OrderItemService`, `ProductService`, `ProductCategoryService` |
+
+---
+
+## Melhorias Não Implementadas
+
+Itens que complementariam a solução em um contexto de produção, mas que foram deixados de fora pelo escopo do desafio.
+
+### Autenticação e Autorização
+
+Não há nenhum mecanismo de identidade na solução. Em produção seria necessário separar os perfis de acesso — por exemplo, clientes montam pedidos enquanto operadores gerenciam o status — usando **ASP.NET Core Identity** com JWT ou uma solução de identidade externa (Keycloak, Auth0).
+
+### Testes de Integração
+
+Os testes atuais são unitários e usam mocks. Testes de integração com banco real (usando **Testcontainers** para subir um SQL Server efêmero) dariam mais confiança nas queries EF Core, nas migrations e nas regras de banco (unique indexes, FK constraints).
+
+### Paginação
+
+O projeto já contém `GoodHamburger.Shared.Pagination` como placeholder. Em produção, endpoints como `GET /api/orders` precisariam de paginação (`page`, `pageSize`, `totalCount`) para não retornar toda a base em uma única requisição.
+
+### Gestão de Produtos e Categorias
+
+A interface Blazor só exibe produtos — não há telas para cadastrar, editar ou desativar produtos e categorias. Isso hoje exige acesso direto ao banco ou à documentação Scalar.
+
+### Upload de Imagens
+
+O campo `ImageUrl` armazena uma URL externa. Uma solução completa teria upload de arquivo (para um bucket S3, Azure Blob Storage ou similar) com geração da URL após o upload, em vez de depender de links externos que podem sair do ar.
+
+### Logs Estruturados
+
+O projeto usa o logging padrão do ASP.NET Core. Em produção, **Serilog** com saída em JSON e sink para uma plataforma centralizada (Elastic, Seq, Datadog) facilitaria rastrear erros e correlacionar requisições.
+
+### Notificações em Tempo Real
+
+Mudanças de status do pedido hoje exigem que o usuário recarregue a página. **SignalR** permitiria que o frontend recebesse atualizações de status assim que o operador avançasse o pedido, sem polling.
+
+### Cache de Respostas
+
+Endpoints de leitura estável (produtos, categorias) poderiam usar **IMemoryCache** ou **IDistributedCache** (Redis) para reduzir carga no banco em cenários de alto volume.
+
+### Pipeline de CI/CD
+
+Não há automação de build, testes e deploy. Um workflow no **GitHub Actions** rodando `dotnet build`, `dotnet test` e publicando artefatos a cada pull request garantiria que nada quebrasse silenciosamente.
+
+### Health Checks
+
+Expor um endpoint `/health` via `Microsoft.Extensions.Diagnostics.HealthChecks` com verificação de conectividade com o banco permitiria que orquestradores (Kubernetes, load balancers) detectem instâncias degradadas automaticamente.
 
 ---
 
