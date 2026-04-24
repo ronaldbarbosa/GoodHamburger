@@ -19,7 +19,7 @@ public class OrderItemService : ServiceBase<OrderItem>, IOrderItemService
         IOrderItemRepository orderItemRepository,
         IProductRepository productRepository,
         IUnitOfWork unitOfWork)
-        : base(orderItemRepository)
+        : base(orderItemRepository, unitOfWork)
     {
         _orderService = orderService;
         _orderItemRepository = orderItemRepository;

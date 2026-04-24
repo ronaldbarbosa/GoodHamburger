@@ -15,7 +15,8 @@ public class ProductService : ServiceBase<Product>, IProductService
 
     public ProductService(
         IProductRepository orderItemRepository,
-        IProductCategoryRepository categoryRepository) : base(orderItemRepository)
+        IProductCategoryRepository categoryRepository,
+        IUnitOfWork unitOfWork) : base(orderItemRepository, unitOfWork)
     {
         _orderItemRepository = orderItemRepository;
         _categoryRepository = categoryRepository;

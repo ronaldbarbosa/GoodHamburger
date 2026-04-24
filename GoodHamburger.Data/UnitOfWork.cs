@@ -8,6 +8,8 @@ public class UnitOfWork(DataContext context) : IUnitOfWork
 {
     private IDbContextTransaction? _transaction;
 
+    public async Task SaveChangesAsync() => await context.SaveChangesAsync();
+
     public async Task BeginTransactionAsync()
     {
         _transaction = await context.Database.BeginTransactionAsync();

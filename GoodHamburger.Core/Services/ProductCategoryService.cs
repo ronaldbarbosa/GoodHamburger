@@ -11,7 +11,9 @@ public class ProductCategoryService : ServiceBase<ProductCategory>, IProductCate
 {
     private readonly IProductCategoryRepository _orderItemRepository;
 
-    public ProductCategoryService(IProductCategoryRepository orderItemRepository) : base(orderItemRepository)
+    public ProductCategoryService(
+        IProductCategoryRepository orderItemRepository,
+        IUnitOfWork unitOfWork) : base(orderItemRepository, unitOfWork)
     {
         _orderItemRepository = orderItemRepository;
     }

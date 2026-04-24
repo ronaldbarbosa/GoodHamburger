@@ -1,5 +1,6 @@
 using GoodHamburger.Core.Entities;
 using GoodHamburger.Core.Exceptions;
+using GoodHamburger.Core.Interfaces;
 using GoodHamburger.Core.Interfaces.Repositories;
 using GoodHamburger.Core.Services;
 using GoodHamburger.Core.ValueObjects;
@@ -11,16 +12,21 @@ public class OrderServiceTests
 {
     private readonly Mock<IOrderRepository> _orderRepositoryMock;
     private readonly Mock<IProductRepository> _productRepositoryMock;
+    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly OrderService _orderService;
 
     public OrderServiceTests()
     {
         _orderRepositoryMock = new Mock<IOrderRepository>();
         _productRepositoryMock = new Mock<IProductRepository>();
+        _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).Returns(Task.CompletedTask);
+
         _orderService = new OrderService(
-            _orderRepositoryMock.Object, 
-            _productRepositoryMock.Object, 
-            new TestableDiscountCalculatorService());
+            _orderRepositoryMock.Object,
+            _productRepositoryMock.Object,
+            new TestableDiscountCalculatorService(),
+            _unitOfWorkMock.Object);
     }
 
     private class TestableDiscountCalculatorService : DiscountCalculatorService { }

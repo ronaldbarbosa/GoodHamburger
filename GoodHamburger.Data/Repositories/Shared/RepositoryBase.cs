@@ -20,25 +20,23 @@ public abstract class RepositoryBase<TEntity>(DataContext context) : IRepository
 
     public virtual async Task<TEntity> AddAsync(TEntity entity)
     {
-        Context.Add(entity);
-        await Context.SaveChangesAsync();
+        await Context.Set<TEntity>().AddAsync(entity);
         return entity;
     }
 
-    public virtual async Task UpdateAsync(TEntity entity)
+    public virtual Task UpdateAsync(TEntity entity)
     {
         Context.Entry(entity).State = EntityState.Modified;
-        await Context.SaveChangesAsync();
+        return Task.CompletedTask;
     }
 
     public virtual async Task DeleteAsync(int id)
     {
         var entity = await GetByIdAsync(id);
-        
+
         if (entity == null)
             throw new EntityNotFoundException(nameof(TEntity), id);
-        
+
         Context.Set<TEntity>().Remove(entity);
-        await Context.SaveChangesAsync();
     }
 }

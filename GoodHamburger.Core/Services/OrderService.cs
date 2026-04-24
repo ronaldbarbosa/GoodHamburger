@@ -1,5 +1,6 @@
 using GoodHamburger.Core.Entities;
 using GoodHamburger.Core.Exceptions;
+using GoodHamburger.Core.Interfaces;
 using GoodHamburger.Core.Interfaces.Repositories;
 using GoodHamburger.Core.Interfaces.Services;
 using GoodHamburger.Core.Services.Shared;
@@ -15,7 +16,8 @@ public class OrderService : ServiceBase<Order>, IOrderService
     public OrderService(
         IOrderRepository orderOrderItemRepository,
         IProductRepository productRepository,
-        IDiscountCalculatorService discountCalculatorService) : base(orderOrderItemRepository)
+        IDiscountCalculatorService discountCalculatorService,
+        IUnitOfWork unitOfWork) : base(orderOrderItemRepository, unitOfWork)
     {
         _orderOrderItemRepository = orderOrderItemRepository;
         _productRepository = productRepository;

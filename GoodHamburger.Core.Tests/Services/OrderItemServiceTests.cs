@@ -26,7 +26,8 @@ public class OrderItemServiceTests
         var orderService = new OrderService(
             _orderRepositoryMock.Object,
             _productRepositoryMock.Object,
-            new TestableDiscountCalculatorService());
+            new TestableDiscountCalculatorService(),
+            _unitOfWorkMock.Object);
 
         _orderItemService = new OrderItemService(
             orderService,
@@ -34,6 +35,7 @@ public class OrderItemServiceTests
             _productRepositoryMock.Object,
             _unitOfWorkMock.Object);
 
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).Returns(Task.CompletedTask);
         _unitOfWorkMock.Setup(u => u.BeginTransactionAsync()).Returns(Task.CompletedTask);
         _unitOfWorkMock.Setup(u => u.CommitAsync()).Returns(Task.CompletedTask);
         _unitOfWorkMock.Setup(u => u.RollbackAsync()).Returns(Task.CompletedTask);

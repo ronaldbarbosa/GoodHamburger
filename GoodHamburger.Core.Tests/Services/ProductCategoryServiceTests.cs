@@ -1,5 +1,6 @@
 using GoodHamburger.Core.Entities;
 using GoodHamburger.Core.Exceptions;
+using GoodHamburger.Core.Interfaces;
 using GoodHamburger.Core.Interfaces.Repositories;
 using GoodHamburger.Core.Services;
 using Moq;
@@ -9,12 +10,18 @@ namespace GoodHamburger.Core.Tests.Services;
 public class ProductCategoryServiceTests
 {
     private readonly Mock<IProductCategoryRepository> _categoryRepositoryMock;
+    private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly ProductCategoryService _categoryService;
 
     public ProductCategoryServiceTests()
     {
         _categoryRepositoryMock = new Mock<IProductCategoryRepository>();
-        _categoryService = new ProductCategoryService(_categoryRepositoryMock.Object);
+        _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).Returns(Task.CompletedTask);
+
+        _categoryService = new ProductCategoryService(
+            _categoryRepositoryMock.Object,
+            _unitOfWorkMock.Object);
     }
 
     [Fact]
