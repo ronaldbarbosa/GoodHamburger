@@ -1,6 +1,8 @@
+using GoodHamburger.Core.Interfaces;
 using GoodHamburger.Core.Interfaces.Repositories;
 using GoodHamburger.Core.Interfaces.Services;
 using GoodHamburger.Core.Services;
+using GoodHamburger.Data;
 using GoodHamburger.Data.Context;
 using GoodHamburger.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +26,7 @@ public static class NativeInjectorConfig
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IProductCategoryService, ProductCategoryService>();
         services.AddScoped<IProductService, ProductService>();
-        
-        services.AddSingleton<IDiscountCalculator, DiscountCalculator>();
+        services.AddScoped<IDiscountCalculator, DiscountCalculator>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
     }
 }

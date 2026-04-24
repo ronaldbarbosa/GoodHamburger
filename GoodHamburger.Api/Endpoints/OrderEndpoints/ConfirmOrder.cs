@@ -1,5 +1,6 @@
 using GoodHamburger.Api.Models.Responses;
 using GoodHamburger.Core.Entities;
+using GoodHamburger.Core.Exceptions;
 using GoodHamburger.Core.Interfaces.Services;
 
 namespace GoodHamburger.Api.Endpoints.OrderEndpoints;
@@ -13,22 +14,22 @@ public static class ConfirmOrder
         try
         {
             var order = await orderService.GetByIdAsync(id);
-            
+
             if (order is null)
             {
                 var validation = new ValidationResponse([new ValidationItemResponse("id", "Pedido não encontrado.")]);
                 return Results.NotFound(validation);
             }
-            
+
             if (order.Status != OrderStatus.Pending)
             {
                 var validation = new ValidationResponse([new ValidationItemResponse("status", "Apenas pedidos pendentes podem ser confirmados.")]);
                 return Results.BadRequest(validation);
             }
-            
+
             order.Status = OrderStatus.Confirmed;
             await orderService.UpdateAsync(order);
-            
+
             var response = new OrderResponse(
                 order.Id,
                 order.Items.Select(oi => new OrderItemResponse(
@@ -45,8 +46,13 @@ public static class ConfirmOrder
                 order.Total.ToString(),
                 order.CreatedAt,
                 order.Status.ToString());
-            
+
             return Results.Ok(response);
+        }
+        catch (Exception ex) when (ex is BusinessRuleViolationException or EntityNotFoundException)
+        {
+            var validation = new ValidationResponse([new ValidationItemResponse("", ex.Message)]);
+            return Results.BadRequest(validation);
         }
         catch (Exception)
         {

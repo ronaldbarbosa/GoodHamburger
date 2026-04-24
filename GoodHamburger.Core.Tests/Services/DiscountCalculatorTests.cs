@@ -10,14 +10,14 @@ public class DiscountCalculatorTests
 
     private readonly TestableDiscountCalculator _calculator = new();
 
-    private static Product CreateProduct(int id, string name, string categoryName, decimal price)
+    private static Product CreateProduct(int id, string name, string categoryName, decimal price, int categoryId = 0)
     {
         return new Product
         {
             Id = id,
             Name = name,
             Price = new Money(price),
-            Category = new ProductCategory { Id = 1, Name = categoryName }
+            Category = new ProductCategory { Id = categoryId, Name = categoryName }
         };
     }
 
@@ -35,9 +35,9 @@ public class DiscountCalculatorTests
     {
         var products = new[]
         {
-            CreateProduct(1, "X-Burger", "Sandwich", 15.00m),
-            CreateProduct(2, "Batata", "Side", 8.00m),
-            CreateProduct(3, "Refrigerante", "Beverage", 5.00m)
+            CreateProduct(1, "X-Burger", "Sanduíches", 15.00m, 1),
+            CreateProduct(2, "Batata Frita", "Acompanhamentos", 8.00m, 2),
+            CreateProduct(3, "Refrigerante", "Bebidas", 5.00m, 3)
         };
         var order = CreateOrder(products);
 
@@ -51,9 +51,9 @@ public class DiscountCalculatorTests
     {
         var products = new[]
         {
-            CreateProduct(1, "X-Burger", "Sandwich", 15.00m),
-            CreateProduct(2, "Batata", "Side", 8.00m),
-            CreateProduct(3, "Refrigerante", "Beverage", 5.00m)
+            CreateProduct(1, "X-Burger", "Sanduíches", 15.00m, 1),
+            CreateProduct(2, "Batata Frita", "Acompanhamentos", 8.00m, 2),
+            CreateProduct(3, "Refrigerante", "Bebidas", 5.00m, 3)
         };
         var order = CreateOrder(products);
         order.Subtotal = _calculator.CalculateSubtotal(order);
@@ -69,8 +69,8 @@ public class DiscountCalculatorTests
     {
         var products = new[]
         {
-            CreateProduct(1, "X-Burger", "Sandwich", 15.00m),
-            CreateProduct(2, "Refrigerante", "Beverage", 5.00m)
+            CreateProduct(1, "X-Burger", "Sanduíches", 15.00m, 1),
+            CreateProduct(2, "Refrigerante", "Bebidas", 5.00m, 3)
         };
         var order = CreateOrder(products);
         order.Subtotal = _calculator.CalculateSubtotal(order);
@@ -86,8 +86,8 @@ public class DiscountCalculatorTests
     {
         var products = new[]
         {
-            CreateProduct(1, "X-Burger", "Sandwich", 15.00m),
-            CreateProduct(2, "Batata", "Side", 8.00m)
+            CreateProduct(1, "X-Burger", "Sanduíches", 15.00m, 1),
+            CreateProduct(2, "Batata Frita", "Acompanhamentos", 8.00m, 2)
         };
         var order = CreateOrder(products);
         order.Subtotal = _calculator.CalculateSubtotal(order);
@@ -103,7 +103,7 @@ public class DiscountCalculatorTests
     {
         var products = new[]
         {
-            CreateProduct(1, "X-Burger", "Sandwich", 15.00m)
+            CreateProduct(1, "X-Burger", "Sanduíches", 15.00m, 1)
         };
         var order = CreateOrder(products);
         order.Subtotal = _calculator.CalculateSubtotal(order);
@@ -119,8 +119,8 @@ public class DiscountCalculatorTests
     {
         var products = new[]
         {
-            CreateProduct(1, "Batata", "Side", 8.00m),
-            CreateProduct(2, "Refrigerante", "Beverage", 5.00m)
+            CreateProduct(1, "Batata Frita", "Acompanhamentos", 8.00m, 2),
+            CreateProduct(2, "Refrigerante", "Bebidas", 5.00m, 3)
         };
         var order = CreateOrder(products);
         order.Subtotal = _calculator.CalculateSubtotal(order);

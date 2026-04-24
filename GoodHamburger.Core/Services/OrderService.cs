@@ -21,11 +21,11 @@ public class OrderService : ServiceBase<Order>, IOrderService
         _productRepository = productRepository;
         _discountCalculator = discountCalculator;
     }
-    
+
     public override async Task<Order> CreateAsync(Order entity)
     {
         var products = new List<Product>();
-        
+
         foreach (var item in entity.Items)
         {
             var product = await _productRepository.GetByIdAsync(item.ProductId);
@@ -36,6 +36,7 @@ public class OrderService : ServiceBase<Order>, IOrderService
                 throw new BusinessRuleViolationException($"Produto '{product.Name}' não está ativo.");
 
             item.Product = product;
+            item.UnitPrice = product.Price;
             products.Add(product);
         }
 
@@ -64,6 +65,7 @@ public class OrderService : ServiceBase<Order>, IOrderService
                 throw new BusinessRuleViolationException($"Produto '{product.Name}' não está ativo.");
 
             item.Product = product;
+            item.UnitPrice = product.Price;
             item.OrderId = entity.Id;
             products.Add(product);
         }

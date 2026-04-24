@@ -34,9 +34,9 @@ public class OrderServiceTests
     [Fact]
     public async Task CreateAsync_ValidOrder_ReturnsOrder()
     {
-        var sandwich = CreateProduct(1, "X-Burger", 15.00m, 1, "Sandwich");
-        var side = CreateProduct(2, "Batata", 8.00m, 2, "Side");
-        var beverage = CreateProduct(3, "Refrigerante", 5.00m, 3, "Beverage");
+        var sandwich = CreateProduct(1, "X-Burger", 15.00m, 1, "Sanduíches");
+        var side = CreateProduct(2, "Batata Frita", 8.00m, 2, "Acompanhamentos");
+        var beverage = CreateProduct(3, "Refrigerante", 5.00m, 3, "Bebidas");
 
         var order = new Order
         {
@@ -93,8 +93,8 @@ public class OrderServiceTests
     [Fact]
     public async Task CreateAsync_DuplicateCategories_ThrowsDuplicateItemException()
     {
-        var sandwich = CreateProduct(1, "X-Burger", 15.00m, 1, "Sandwich");
-        var sandwich2 = CreateProduct(2, "X-Salada", 12.00m, 1, "Sandwich");
+        var sandwich = CreateProduct(1, "X-Burger", 15.00m, 1, "Sanduíches");
+        var sandwich2 = CreateProduct(2, "X-Salada", 12.00m, 1, "Sanduíches");
 
         var order = new Order
         {
@@ -121,7 +121,7 @@ public class OrderServiceTests
             Items = new List<OrderItem>()
         };
 
-        var sandwich = CreateProduct(1, "X-Burger", 15.00m, 1, "Sandwich");
+        var sandwich = CreateProduct(1, "X-Burger", 15.00m, 1, "Sanduíches");
 
         var order = new Order
         {

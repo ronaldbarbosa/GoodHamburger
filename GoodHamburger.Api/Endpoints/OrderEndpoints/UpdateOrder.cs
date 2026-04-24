@@ -1,6 +1,7 @@
 using GoodHamburger.Api.Models.Requests;
 using GoodHamburger.Api.Models.Responses;
 using GoodHamburger.Core.Entities;
+using GoodHamburger.Core.Exceptions;
 using GoodHamburger.Core.Interfaces.Services;
 
 namespace GoodHamburger.Api.Endpoints.OrderEndpoints;
@@ -15,13 +16,13 @@ public static class UpdateOrder
         try
         {
             var existingOrder = await orderService.GetByIdAsync(id);
-            
+
             if (existingOrder is null)
             {
                 var validation = new ValidationResponse([new ValidationItemResponse("id", "Pedido não encontrado.")]);
                 return Results.NotFound(validation);
             }
-            
+
             if (request.Items is not null)
             {
                 existingOrder.Items = request.Items.Select(i => new OrderItem
@@ -30,9 +31,9 @@ public static class UpdateOrder
                     Quantity = i.Quantity
                 }).ToList();
             }
-            
+
             await orderService.UpdateAsync(existingOrder);
-            
+
             var response = new OrderResponse(
                 existingOrder.Id,
                 existingOrder.Items.Select(oi => new OrderItemResponse(
@@ -49,8 +50,23 @@ public static class UpdateOrder
                 existingOrder.Total.ToString(),
                 existingOrder.CreatedAt,
                 existingOrder.Status.ToString());
-            
+
             return Results.Ok(response);
+        }
+        catch (EntityNotFoundException ex)
+        {
+            var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
+            return Results.BadRequest(validation);
+        }
+        catch (InvalidItemQuantityException ex)
+        {
+            var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
+            return Results.BadRequest(validation);
+        }
+        catch (Exception ex) when (ex is DuplicateItemException or BusinessRuleViolationException)
+        {
+            var validation = new ValidationResponse([new ValidationItemResponse("", ex.Message)]);
+            return Results.BadRequest(validation);
         }
         catch (Exception)
         {

@@ -7,9 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddCors(options => options.AddPolicy("AllowBlazor", policy =>
-    policy.AllowAnyOrigin()
+{
+    var origins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+    policy.WithOrigins(origins)
         .AllowAnyMethod()
-        .AllowAnyHeader()));
+        .AllowAnyHeader();
+}));
 
 builder.Services.RegisterServices(builder.Configuration);
 
