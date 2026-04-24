@@ -1,0 +1,115 @@
+@inject ProductService ProductService
+@inject OrderService OrderService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Editar Pedido #@OrderId.ToString("000000")</MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (_loading)
+        {
+            <MudProgressLinear Indeterminate="true" Class="mb-2" />
+        }
+        else
+        {
+            <MudText Typo="Typo.body2" Color="Color.Default" Class="mb-4">
+                Selecione um produto por categoria. Deixe em branco para remover o item do pedido.
+            </MudText>
+            @foreach (var category in _categories)
+            {
+                <MudSelect T="int?"
+                           Label="@category.Name"
+                           Value="_selected[category.Id]"
+                           ValueChanged="v => _selected[category.Id] = v"
+                           Clearable="true"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           Class="mb-4">
+                    @foreach (var product in _productsByCategory[category.Id])
+                    {
+                        <MudSelectItem T="int?" Value="@((int?)product.Id)">
+                            @product.Name — @product.Price
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            }
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="SaveAsync"
+                   Disabled="_saving || _loading">
+            @if (_saving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            Salvar
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public int OrderId { get; set; }
+
+    [Parameter]
+    public List<OrderItemResponse> CurrentItems { get; set; } = [];
+
+    private bool _loading = true;
+    private bool _saving;
+    private List<ProductCategoryResponse> _categories = [];
+    private Dictionary<int, List<ProductResponse>> _productsByCategory = [];
+    private Dictionary<int, int?> _selected = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var products = await ProductService.GetAllAsync();
+
+        _categories = products
+            .Select(p => p.Category)
+            .DistinctBy(c => c.Id)
+            .OrderBy(c => c.Id)
+            .ToList();
+
+        _productsByCategory = _categories.ToDictionary(
+            c => c.Id,
+            c => products.Where(p => p.Category.Id == c.Id).ToList());
+
+        foreach (var category in _categories)
+        {
+            var current = CurrentItems.FirstOrDefault(i => i.Product.Category.Id == category.Id);
+            _selected[category.Id] = current?.Product.Id;
+        }
+
+        _loading = false;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+
+        var items = _selected.Values
+            .Where(id => id.HasValue)
+            .Select(id => new OrderItemInput(id!.Value, 1))
+            .ToList();
+
+        var updated = await OrderService.UpdateAsync(OrderId, new UpdateOrderRequest(items));
+        _saving = false;
+
+        if (updated is null)
+        {
+            Snackbar.Add("Erro ao salvar. Verifique os itens selecionados.", Severity.Error);
+            return;
+        }
+
+        MudDialog.Close();
+    }
+}

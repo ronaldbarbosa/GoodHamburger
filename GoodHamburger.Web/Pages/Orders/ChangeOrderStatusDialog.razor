@@ -1,0 +1,96 @@
+@inject OrderService OrderService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">Atualizar Status — Pedido #@OrderId.ToString("000000")</MudText>
+    </TitleContent>
+    <DialogContent>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+            <MudText Typo="Typo.body2">Status atual:</MudText>
+            <MudChip T="string" Color="@CurrentStatusColor" Size="Size.Small">@CurrentStatusDisplay</MudChip>
+        </div>
+
+        <MudSelect T="string"
+                   Label="Novo status"
+                   @bind-Value="_selectedStatus"
+                   ToStringFunc="@(v => _availableStatuses.FirstOrDefault(s => s.Value == v).Display ?? v ?? "")"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense">
+            @foreach (var (value, display, color) in _availableStatuses)
+            {
+                <MudSelectItem T="string" Value="@value">
+                    <MudChip T="string" Color="@color" Size="Size.Small" Style="pointer-events: none; margin: 0;">
+                        @display
+                    </MudChip>
+                </MudSelectItem>
+            }
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel">Cancelar</MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="SaveAsync"
+                   Disabled="_saving || string.IsNullOrEmpty(_selectedStatus)">
+            @if (_saving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            Confirmar
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public int OrderId { get; set; }
+
+    [Parameter]
+    public string CurrentStatus { get; set; } = "";
+
+    private static readonly List<(string Value, string Display, Color Color)> StatusPipeline =
+    [
+        ("Confirmed", "Confirmado",    Color.Info),
+        ("Preparing", "Em Preparação", Color.Info),
+        ("Ready",     "Pronto",        Color.Success),
+        ("Completed", "Concluído",     Color.Success),
+    ];
+
+    private bool _saving;
+    private string _selectedStatus = "";
+    private List<(string Value, string Display, Color Color)> _availableStatuses = [];
+
+    private string CurrentStatusDisplay => StatusPipeline.FirstOrDefault(s => s.Value == CurrentStatus).Display ?? CurrentStatus;
+    private Color CurrentStatusColor => StatusPipeline.FirstOrDefault(s => s.Value == CurrentStatus).Color;
+
+    protected override void OnInitialized()
+    {
+        var currentIndex = StatusPipeline.FindIndex(s => s.Value == CurrentStatus);
+        _availableStatuses = currentIndex >= 0
+            ? StatusPipeline.Skip(currentIndex + 1).ToList()
+            : [];
+
+        _selectedStatus = _availableStatuses.FirstOrDefault().Value ?? "";
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task SaveAsync()
+    {
+        _saving = true;
+        var success = await OrderService.UpdateStatusAsync(OrderId, _selectedStatus);
+        _saving = false;
+
+        if (!success)
+        {
+            Snackbar.Add("Erro ao alterar status. Tente novamente.", Severity.Error);
+            return;
+        }
+
+        MudDialog.Close();
+    }
+}

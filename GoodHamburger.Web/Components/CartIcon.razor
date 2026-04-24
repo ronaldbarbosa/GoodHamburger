@@ -1,81 +1,74 @@
-@using GoodHamburger.Web.Services
 @inject CartService CartService
-@inject HttpClient Http
-@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
 
 @if (CartService.IsInitialized)
 {
-    <MudBadge Content="CartService.ItemCount" Color="Color.Primary" Overlap="true" Bordered="true">
-        <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Inherit" OnClick="OpenCartDialog" />
-    </MudBadge>
-}
+    <div style="position: relative; display: inline-flex;">
+        <MudBadge Content="CartService.ItemCount" Color="Color.Default" Overlap="true" Bordered="true">
+            <MudIconButton Icon="@Icons.Material.Filled.ShoppingCart"
+                           Color="@(CartService.ItemCount > 0 ? Color.Warning : Color.Inherit)"
+                           OnClick="TogglePopover" />
+        </MudBadge>
 
-<MudDialog @bind-IsVisible="dialogVisible" MaxWidth="MaxWidth.Small" FullWidth="true">
-    <DialogContent>
-        <MudText Typo="Typo.h5" Class="mb-4">Carrinho</MudText>
-        
-        @if (!CartService.Items.Any())
-        {
-            <MudText Color="Color.Default">Seu carrinho está vazio.</MudText>
-        }
-        else
-        {
-            <MudList T="CartItem">
+        <MudPopover Open="@_isOpen"
+                    AnchorOrigin="Origin.BottomRight"
+                    TransformOrigin="Origin.TopRight"
+                    Paper="true"
+                    Elevation="4"
+                    Class="pa-4"
+                    Style="min-width: 280px; max-width: 360px;">
+            <MudText Typo="Typo.h6" Class="mb-3">Carrinho</MudText>
+
+            @if (!CartService.Items.Any())
+            {
+                <MudText Typo="Typo.body2" Color="Color.Default">Seu carrinho está vazio.</MudText>
+            }
+            else
+            {
                 @foreach (var item in CartService.Items)
                 {
-                    <MudListItem>
-                        <MudGrid>
-                            <MudItem xs="8">
-                                <MudText>@item.ProductName</MudText>
-                            </MudItem>
-                            <MudItem xs="4" Style="text-align: right;">
-                                <MudText>x @item.Quantity</MudText>
-                            </MudItem>
-                        </MudGrid>
-                    </MudListItem>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <MudText Typo="Typo.body2">@item.ProductName</MudText>
+                        <MudText Typo="Typo.body2">@item.UnitPrice</MudText>
+                    </div>
                 }
-            </MudList>
-            
-            <MudDivider Class="my-2" />
-            
-            <MudText Typo="Typo.h6">
-                Total: @(CartService.CurrentCart?.Total ?? "R$ 0,00")
-            </MudText>
-        }
-    </DialogContent>
-    <DialogActions>
-        <MudButton Variant="Variant.Text" OnClick="CloseDialog">Fechar</MudButton>
-        @if (CartService.Items.Any())
-        {
-            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="ConfirmCart">
-                Confirmar Pedido
+                <MudDivider Class="my-3" />
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <MudText Typo="Typo.subtitle2">Total</MudText>
+                    <MudText Typo="Typo.subtitle2">@(CartService.CurrentCart?.Total ?? "R$ 0,00")</MudText>
+                </div>
+            }
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       StartIcon="@Icons.Material.Filled.ShoppingCart"
+                       OnClick="GoToCart">
+                Ver carrinho
             </MudButton>
-        }
-    </DialogActions>
-</MudDialog>
+        </MudPopover>
+    </div>
+}
+
+@if (_isOpen)
+{
+    <div style="position: fixed; inset: 0; z-index: 1299;" @onclick="ClosePopover"></div>
+}
 
 @code {
-    private bool dialogVisible;
+    private bool _isOpen;
 
     protected override void OnInitialized()
     {
-        CartService.OnCartChanged += () => StateHasChanged();
+        CartService.OnCartChanged += StateHasChanged;
     }
 
-    private void OpenCartDialog()
-    {
-        dialogVisible = true;
-    }
+    private void TogglePopover() => _isOpen = !_isOpen;
+    private void ClosePopover() => _isOpen = false;
 
-    private void CloseDialog()
+    private void GoToCart()
     {
-        dialogVisible = false;
-    }
-
-    private async Task ConfirmCart()
-    {
-        await CartService.ConfirmCartAsync(Http);
-        Snackbar.Add("Pedido confirmado com sucesso!", Severity.Success);
-        CloseDialog();
+        _isOpen = false;
+        Navigation.NavigateTo("/cart");
     }
 }

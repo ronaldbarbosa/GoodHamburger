@@ -25,7 +25,7 @@
 <MudGrid Class="mt-4">
     @foreach (var product in filteredProducts)
     {
-        <MudItem xs="12" sm="4" md="3" lg="2">
+        <MudItem xs="12" sm="6" md="4" lg="3">
             <MudCard>
                 <MudCardMedia Image="@GetProductImage(product.Category.Name)" Height="140" />
                 <MudCardContent>
@@ -35,12 +35,12 @@
                 </MudCardContent>
                 <MudCardActions>
                     <MudButton Variant="Variant.Filled"
-                               Color="@(IsCategoryInCart(product.Category.Name) ? Color.Default : Color.Primary)"
+                               Color="@(IsCategoryInCart(product.Category.Name) ? Color.Success : Color.Primary)"
                                FullWidth="true"
                                StartIcon="@(IsCategoryInCart(product.Category.Name) ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.AddShoppingCart)"
-                               OnClick="() => AddToCart(product)"
+                               OnClick="() => AddToCartAsync(product)"
                                Disabled="@IsCategoryInCart(product.Category.Name)">
-                        @(IsCategoryInCart(product.Category.Name) ? "No carrinho" : "Adicionar")
+                        @(IsCategoryInCart(product.Category.Name) ? "Categoria adicionada ao carrinho" : "Adicionar")
                     </MudButton>
                 </MudCardActions>
             </MudCard>
@@ -96,7 +96,7 @@
     private bool IsCategoryInCart(string categoryName) =>
         CartService.Items.Any(i => i.CategoryName.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
 
-    private async Task AddToCart(ProductResponse product)
+    private async Task AddToCartAsync(ProductResponse product)
     {
         var added = await CartService.AddItemAsync(Http, product.Id, product.Name, product.Category.Name, 1, product.Price);
         if (added)

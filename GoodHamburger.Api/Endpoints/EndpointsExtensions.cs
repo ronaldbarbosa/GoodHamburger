@@ -99,6 +99,22 @@ public static class EndpointsExtensions
             .Produces<ValidationResponse>(StatusCodes.Status400BadRequest)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
+        group.MapPatch("/{id}/cancel", CancelOrder.Handle)
+            .WithDisplayName("CancelarPedido")
+            .WithDescription("Cancelar um pedido")
+            .Produces<OrderResponse>()
+            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
+            .Produces<ValidationResponse>(StatusCodes.Status400BadRequest)
+            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
+
+        group.MapPatch("/{id}/status", UpdateOrderStatus.Handle)
+            .WithDisplayName("AlterarStatusPedido")
+            .WithDescription("Avançar o status de um pedido na progressão")
+            .Produces<OrderResponse>()
+            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
+            .Produces<ValidationResponse>(StatusCodes.Status400BadRequest)
+            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
+
         return app;
     }
     

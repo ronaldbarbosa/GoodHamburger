@@ -1,12 +1,14 @@
 @page "/orders"
 @inject OrderService OrderService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>Pedidos</PageTitle>
 
 <MudText Typo="Typo.h4" Class="mb-4">Pedidos</MudText>
 
 <MudPaper>
-<MudTable T="OrderResponse" Items="orders" Hover="true" Striped="true" Dense="true">
+    <MudTable T="OrderResponse" Items="orders" Hover="true" Striped="true" Dense="true">
         <HeaderContent>
             <MudTh>ID</MudTh>
             <MudTh>Data</MudTh>
@@ -14,21 +16,69 @@
             <MudTh>Desconto</MudTh>
             <MudTh>Total</MudTh>
             <MudTh>Status</MudTh>
-            <MudTh Style="width: 150px;">Ações</MudTh>
+            <MudTh Style="width: 120px;">Ações</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd>#@context.Id.ToString("000000")</MudTd>
-            <MudTd>@context.CreatedAt.ToString("dd/MM/yyyy HH:mm")</MudTd>
-            <MudTd>@context.Subtotal</MudTd>
-            <MudTd>@context.Discount</MudTd>
-            <MudTd>@context.Total</MudTd>
             <MudTd>
-                <MudChip T="string" Color="GetStatusColor(context.Status)" Size="Size.Small">@context.Status</MudChip>
+                <MudText Style="@(context.Status == "Cancelled" ? "opacity: 0.5;" : "")">
+                    #@context.Id.ToString("000000")
+                </MudText>
             </MudTd>
             <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Default" Title="Editar" Size="Size.Small" />
-                <MudIconButton Icon="@Icons.Material.Filled.SwapHoriz" Color="Color.Info" Title="Alterar Status" Size="Size.Small" OnClick="() => ToggleStatus(context)" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Title="Excluir" Size="Size.Small" OnClick="() => DeleteOrder(context.Id)" />
+                <MudText Style="@(context.Status == "Cancelled" ? "opacity: 0.5;" : "")">
+                    @context.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                </MudText>
+            </MudTd>
+            <MudTd>
+                <MudText Style="@(context.Status == "Cancelled" ? "opacity: 0.5;" : "")">
+                    @context.Subtotal
+                </MudText>
+            </MudTd>
+            <MudTd>
+                <MudText Style="@(context.Status == "Cancelled" ? "opacity: 0.5;" : "")">
+                    @context.Discount
+                </MudText>
+            </MudTd>
+            <MudTd>
+                <MudText Style="@(context.Status == "Cancelled" ? "opacity: 0.5;" : "")">
+                    @context.Total
+                </MudText>
+            </MudTd>
+            <MudTd>
+                <MudChip T="string" Color="GetStatusColor(context.Status)" Size="Size.Small">
+                    @GetStatusDisplayName(context.Status)
+                </MudChip>
+            </MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Default"
+                               Title="Editar"
+                               Size="Size.Small"
+                               Disabled="@(context.Status is "Cancelled" or "Completed" or "Ready")"
+                               OnClick="() => OpenEditDialogAsync(context)" />
+                <MudIconButton Icon="@Icons.Material.Filled.SwapHoriz"
+                               Color="Color.Info"
+                               Title="Atualizar Status"
+                               Size="Size.Small"
+                               Disabled="@(context.Status is "Cancelled" or "Completed")"
+                               OnClick="() => OpenStatusDialogAsync(context)" />
+                @if (context.Status == "Cancelled")
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.DeleteForever"
+                                   Color="Color.Error"
+                                   Title="Excluir permanentemente"
+                                   Size="Size.Small"
+                                   OnClick="() => OpenDeleteDialogAsync(context)" />
+                }
+                else
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                   Color="Color.Warning"
+                                   Title="Cancelar pedido"
+                                   Size="Size.Small"
+                                   Disabled="@(context.Status is "Completed")"
+                                   OnClick="() => OpenCancelDialogAsync(context)" />
+                }
             </MudTd>
         </RowTemplate>
         <NoRecordsContent>
@@ -45,27 +95,106 @@
 
     protected override async Task OnInitializedAsync()
     {
-        orders = await OrderService.GetAllAsync();
-        orders = orders.Where(o => o.Status != "Pending").ToList();
+        await LoadOrdersAsync();
     }
 
-    private Color GetStatusColor(string status)
+    private async Task LoadOrdersAsync()
     {
-        return status.ToLower() switch
+        var all = await OrderService.GetAllAsync();
+        orders = all.Where(o => o.Status != "Pending").ToList();
+    }
+
+    private Color GetStatusColor(string status) => status.ToLower() switch
+    {
+        "pending"   => Color.Warning,
+        "confirmed" => Color.Info,
+        "preparing" => Color.Info,
+        "ready"     => Color.Success,
+        "completed" => Color.Success,
+        "cancelled" => Color.Error,
+        _           => Color.Default
+    };
+
+    private string GetStatusDisplayName(string status) => status.ToLower() switch
+    {
+        "pending"   => "Pendente",
+        "confirmed" => "Confirmado",
+        "preparing" => "Em Preparação",
+        "ready"     => "Pronto",
+        "completed" => "Concluído",
+        "cancelled" => "Cancelado",
+        _           => status
+    };
+
+    private async Task OpenCancelDialogAsync(OrderResponse order)
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            "Cancelar Pedido",
+            $"Deseja cancelar o pedido #{order.Id:000000}? Ele permanecerá na lista e poderá ser excluído em seguida.",
+            yesText: "Cancelar Pedido",
+            cancelText: "Voltar");
+
+        if (confirmed == true)
+            await CancelOrderAsync(order.Id);
+    }
+
+    private async Task OpenDeleteDialogAsync(OrderResponse order)
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            "Excluir Pedido",
+            $"Deseja excluir permanentemente o pedido #{order.Id:000000}? Esta ação não pode ser desfeita.",
+            yesText: "Excluir",
+            cancelText: "Voltar");
+
+        if (confirmed == true)
+            await DeleteOrderAsync(order.Id);
+    }
+
+    private async Task CancelOrderAsync(int id)
+    {
+        await OrderService.CancelAsync(id);
+        Snackbar.Add($"Pedido #{id:000000} cancelado.", Severity.Warning);
+        await LoadOrdersAsync();
+    }
+
+    private async Task DeleteOrderAsync(int id)
+    {
+        await OrderService.DeleteAsync(id);
+        Snackbar.Add($"Pedido #{id:000000} excluído.", Severity.Success);
+        await LoadOrdersAsync();
+    }
+
+    private async Task OpenEditDialogAsync(OrderResponse order)
+    {
+        var parameters = new DialogParameters<EditOrderDialog>
         {
-            "pendente" => Color.Warning,
-            "em preparação" => Color.Info,
-            "concluído" => Color.Success,
-            "cancelado" => Color.Error,
-            _ => Color.Default
+            { x => x.OrderId, order.Id },
+            { x => x.CurrentItems, order.Items }
         };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<EditOrderDialog>("", parameters, options);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            Snackbar.Add($"Pedido #{order.Id:000000} atualizado.", Severity.Success);
+            await LoadOrdersAsync();
+        }
     }
 
-    private void ToggleStatus(OrderResponse order)
+    private async Task OpenStatusDialogAsync(OrderResponse order)
     {
-    }
-
-    private void DeleteOrder(int id)
-    {
+        var parameters = new DialogParameters<ChangeOrderStatusDialog>
+        {
+            { x => x.OrderId, order.Id },
+            { x => x.CurrentStatus, order.Status }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<ChangeOrderStatusDialog>("", parameters, options);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            Snackbar.Add($"Status do pedido #{order.Id:000000} atualizado.", Severity.Success);
+            await LoadOrdersAsync();
+        }
     }
 }
