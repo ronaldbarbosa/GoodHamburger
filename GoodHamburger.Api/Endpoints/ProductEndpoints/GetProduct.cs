@@ -23,7 +23,8 @@ public static class GetProduct
                 product.Id,
                 product.Name,
                 product.Price.ToString(),
-                new ProductCategoryResponse(product.CategoryId, product.Category!.Name));
+                new ProductCategoryResponse(product.CategoryId, product.Category!.Name),
+                product.ImageUrl);
             
             return Results.Ok(response);
         }

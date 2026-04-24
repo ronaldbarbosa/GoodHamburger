@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using GoodHamburger.Web.Models;
 
 namespace GoodHamburger.Web.Services;
 
@@ -18,7 +19,7 @@ public class CartService
     {
         var orders = await client.GetFromJsonAsync<List<OrderResponse>>("/api/orders");
         var pendingOrder = orders?.FirstOrDefault(o => o.Status == "Pending");
-        
+
         if (pendingOrder is not null)
         {
             _currentCart = pendingOrder;
@@ -71,9 +72,9 @@ public class CartService
     public async Task RemoveItemAsync(HttpClient client, int itemId)
     {
         await client.DeleteAsync($"/api/order-items/{itemId}");
-        
+
         _items.RemoveAll(i => i.Id == itemId);
-        
+
         if (_currentCart is not null)
         {
             _currentCart = await client.GetFromJsonAsync<OrderResponse>($"/api/orders/{_currentCart.Id}");
@@ -84,9 +85,9 @@ public class CartService
     public async Task ConfirmCartAsync(HttpClient client)
     {
         if (_currentCart is null) return;
-        
+
         await client.PatchAsync($"/api/orders/{_currentCart.Id}/confirm", null);
-        
+
         _currentCart = null;
         _items.Clear();
         OnCartChanged?.Invoke();
@@ -99,5 +100,3 @@ public class CartService
         OnCartChanged?.Invoke();
     }
 }
-
-public record CartItem(int Id, int ProductId, string ProductName, string CategoryName, int Quantity, string UnitPrice);

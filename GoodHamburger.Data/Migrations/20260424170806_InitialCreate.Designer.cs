@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoodHamburger.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260421200852_InitialCreate")]
+    [Migration("20260424170806_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -108,6 +108,10 @@ namespace GoodHamburger.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ImageUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -134,6 +138,7 @@ namespace GoodHamburger.Data.Migrations
                             Id = 1,
                             CategoryId = 1,
                             CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            ImageUrl = "https://img77.uenicdn.com/image/upload/v1616473574/business/74412a32-557c-424b-9a43-2dfd3c8a01ab.jpg",
                             IsActive = true,
                             Name = "X-Burger",
                             Price = 15.00m
@@ -143,6 +148,7 @@ namespace GoodHamburger.Data.Migrations
                             Id = 2,
                             CategoryId = 1,
                             CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            ImageUrl = "https://paulinlanches.pedidoturbo.com.br/_core/_uploads/129/2023/01/1648240123i0iafc9kji.jpeg",
                             IsActive = true,
                             Name = "X-Egg",
                             Price = 17.00m
@@ -152,6 +158,7 @@ namespace GoodHamburger.Data.Migrations
                             Id = 3,
                             CategoryId = 1,
                             CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            ImageUrl = "https://imagens.jotaja.com/produtos/2607/8845691EA121444DA9B3A15705E0F7CEC7DDCC8D53ABC58CFC044C87711E87EF.jpeg",
                             IsActive = true,
                             Name = "X-Bacon",
                             Price = 19.00m
@@ -161,6 +168,7 @@ namespace GoodHamburger.Data.Migrations
                             Id = 4,
                             CategoryId = 2,
                             CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            ImageUrl = "https://latourangelle.com/cdn/shop/articles/hikynvl8pjkjqhvpnok6_1200x.jpg?v=1619198610",
                             IsActive = true,
                             Name = "Batata Frita",
                             Price = 10.00m
@@ -168,8 +176,9 @@ namespace GoodHamburger.Data.Migrations
                         new
                         {
                             Id = 5,
-                            CategoryId = 2,
+                            CategoryId = 3,
                             CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            ImageUrl = "https://hortifrutibr.vtexassets.com/arquivos/ids/173841/Refrigerante-Coca-Cola-Lata-350ml-gelada.jpg.jpg?v=638931057551370000",
                             IsActive = true,
                             Name = "Refrigerante",
                             Price = 5.00m
@@ -216,6 +225,13 @@ namespace GoodHamburger.Data.Migrations
                             CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Acompanhamentos"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CreatedAt = new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "Bebidas"
                         });
                 });
 

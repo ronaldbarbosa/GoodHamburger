@@ -26,7 +26,7 @@ public class OrderItemServiceTests
         var orderService = new OrderService(
             _orderRepositoryMock.Object,
             _productRepositoryMock.Object,
-            new TestableDiscountCalculator());
+            new TestableDiscountCalculatorService());
 
         _orderItemService = new OrderItemService(
             orderService,
@@ -39,7 +39,7 @@ public class OrderItemServiceTests
         _unitOfWorkMock.Setup(u => u.RollbackAsync()).Returns(Task.CompletedTask);
     }
 
-    private class TestableDiscountCalculator : DiscountCalculator { }
+    private class TestableDiscountCalculatorService : DiscountCalculatorService { }
 
     private static Product CreateProduct(int id, string name, decimal price, int categoryId, string categoryName) =>
         new() { Id = id, Name = name, Price = new Money(price), CategoryId = categoryId, Category = new ProductCategory { Id = categoryId, Name = categoryName }, IsActive = true };

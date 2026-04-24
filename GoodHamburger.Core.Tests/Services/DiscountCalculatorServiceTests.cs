@@ -4,11 +4,11 @@ using GoodHamburger.Core.ValueObjects;
 
 namespace GoodHamburger.Core.Tests.Services;
 
-public class DiscountCalculatorTests
+public class DiscountCalculatorServiceTests
 {
-    private class TestableDiscountCalculator : DiscountCalculator { }
+    private class TestableDiscountCalculatorService : DiscountCalculatorService { }
 
-    private readonly TestableDiscountCalculator _calculator = new();
+    private readonly TestableDiscountCalculatorService _calculatorService = new();
 
     private static Product CreateProduct(int id, string name, string categoryName, decimal price, int categoryId = 0)
     {
@@ -41,7 +41,7 @@ public class DiscountCalculatorTests
         };
         var order = CreateOrder(products);
 
-        var subtotal = _calculator.CalculateSubtotal(order);
+        var subtotal = _calculatorService.CalculateSubtotal(order);
 
         Assert.Equal(28.00m, subtotal.Amount);
     }
@@ -56,9 +56,9 @@ public class DiscountCalculatorTests
             CreateProduct(3, "Refrigerante", "Bebidas", 5.00m, 3)
         };
         var order = CreateOrder(products);
-        order.Subtotal = _calculator.CalculateSubtotal(order);
+        order.Subtotal = _calculatorService.CalculateSubtotal(order);
 
-        var (discount, rule) = _calculator.Calculate(order);
+        var (discount, rule) = _calculatorService.Calculate(order);
 
         Assert.Equal(28.00m * 0.20m, discount.Amount);
         Assert.Equal("Sanduíche + Batata + Refrigerante (20%)", rule);
@@ -73,9 +73,9 @@ public class DiscountCalculatorTests
             CreateProduct(2, "Refrigerante", "Bebidas", 5.00m, 3)
         };
         var order = CreateOrder(products);
-        order.Subtotal = _calculator.CalculateSubtotal(order);
+        order.Subtotal = _calculatorService.CalculateSubtotal(order);
 
-        var (discount, rule) = _calculator.Calculate(order);
+        var (discount, rule) = _calculatorService.Calculate(order);
 
         Assert.Equal(20.00m * 0.15m, discount.Amount);
         Assert.Equal("Sanduíche + Refrigerante (15%)", rule);
@@ -90,9 +90,9 @@ public class DiscountCalculatorTests
             CreateProduct(2, "Batata Frita", "Acompanhamentos", 8.00m, 2)
         };
         var order = CreateOrder(products);
-        order.Subtotal = _calculator.CalculateSubtotal(order);
+        order.Subtotal = _calculatorService.CalculateSubtotal(order);
 
-        var (discount, rule) = _calculator.Calculate(order);
+        var (discount, rule) = _calculatorService.Calculate(order);
 
         Assert.Equal(23.00m * 0.10m, discount.Amount);
         Assert.Equal("Sanduíche + Batata (10%)", rule);
@@ -106,9 +106,9 @@ public class DiscountCalculatorTests
             CreateProduct(1, "X-Burger", "Sanduíches", 15.00m, 1)
         };
         var order = CreateOrder(products);
-        order.Subtotal = _calculator.CalculateSubtotal(order);
+        order.Subtotal = _calculatorService.CalculateSubtotal(order);
 
-        var (discount, rule) = _calculator.Calculate(order);
+        var (discount, rule) = _calculatorService.Calculate(order);
 
         Assert.Equal(0m, discount.Amount);
         Assert.Equal("Sem desconto", rule);
@@ -123,9 +123,9 @@ public class DiscountCalculatorTests
             CreateProduct(2, "Refrigerante", "Bebidas", 5.00m, 3)
         };
         var order = CreateOrder(products);
-        order.Subtotal = _calculator.CalculateSubtotal(order);
+        order.Subtotal = _calculatorService.CalculateSubtotal(order);
 
-        var (discount, rule) = _calculator.Calculate(order);
+        var (discount, rule) = _calculatorService.Calculate(order);
 
         Assert.Equal(0m, discount.Amount);
         Assert.Equal("Sem desconto", rule);

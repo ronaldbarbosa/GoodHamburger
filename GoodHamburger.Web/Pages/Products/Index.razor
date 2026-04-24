@@ -1,4 +1,5 @@
 @page "/products"
+@using GoodHamburger.Web.Models
 @implements IDisposable
 @inject ProductService ProductService
 @inject ProductCategoryService ProductCategoryService
@@ -27,7 +28,7 @@
     {
         <MudItem xs="12" sm="6" md="4" lg="3">
             <MudCard>
-                <MudCardMedia Image="@GetProductImage(product.Category.Name)" Height="140" />
+                <MudCardMedia Image="@(product.ImageUrl ?? "")" Height="140" />
                 <MudCardContent>
                     <MudText Typo="Typo.h6">@product.Name</MudText>
                     <MudText Typo="Typo.caption" Color="Color.Default">@product.Category.Name</MudText>
@@ -78,19 +79,6 @@
         filteredProducts = categoryId is null
             ? products
             : products.Where(p => p.Category.Id == categoryId).ToList();
-    }
-
-    private string GetProductImage(string categoryName)
-    {
-        return "https://upload.wikimedia.org/wikipedia/commons/b/b0/Hamburger_%2812164386105%29.jpg";
-        // return categoryName.ToLower() switch
-        // {
-        //     "lanche" => "Images/hamburger.png",
-        //     "bebida" => "Images/drink.png",
-        //     "acompanhamento" => "Images/sides.png",
-        //     "sobremesa" => "Images/dessert.png",
-        //     _ => "Images/food.png"
-        // };
     }
 
     private bool IsCategoryInCart(string categoryName) =>

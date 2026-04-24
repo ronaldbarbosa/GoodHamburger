@@ -18,7 +18,8 @@ public static class GetOrderItems
                     oi.ProductId, 
                     oi.Product!.Name,
                     oi.Product.Price.ToString(),
-                    new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name)),
+                    new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
+                    oi.Product!.ImageUrl),
                 oi.Quantity,
                 oi.UnitPrice.ToString()))
                 .ToList();

@@ -4,7 +4,7 @@ using GoodHamburger.Core.ValueObjects;
 
 namespace GoodHamburger.Core.Services;
 
-public class DiscountCalculator :  IDiscountCalculator
+public class DiscountCalculatorService :  IDiscountCalculatorService
 {
     private const decimal FullDiscount = 0.20m;      // Sandwich + Side + Beverage
     private const decimal SandwichBeverageDiscount = 0.15m;  // Sandwich + Beverage

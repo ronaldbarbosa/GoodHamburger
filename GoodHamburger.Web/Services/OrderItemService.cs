@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using GoodHamburger.Web.Models;
 
 namespace GoodHamburger.Web.Services;
 
@@ -25,13 +26,13 @@ public class OrderItemService(HttpClient client)
         }
     }
 
-    public async Task<OrderItemResponse> CreateAsync(CreateOrderItemRequest request)
+    public async Task<OrderItemResponse?> CreateAsync(CreateOrderItemRequest request)
     {
         var response = await _client.PostAsJsonAsync(OrderItemsPath, request);
         return await response.Content.ReadFromJsonAsync<OrderItemResponse>();
     }
 
-    public async Task<OrderItemResponse> UpdateAsync(int id, UpdateOrderItemRequest request)
+    public async Task<OrderItemResponse?> UpdateAsync(int id, UpdateOrderItemRequest request)
     {
         var response = await _client.PutAsJsonAsync($"{OrderItemsPath}/{id}", request);
         return await response.Content.ReadFromJsonAsync<OrderItemResponse>();
@@ -42,9 +43,3 @@ public class OrderItemService(HttpClient client)
         await _client.DeleteAsync($"{OrderItemsPath}/{id}");
     }
 }
-
-public record OrderItemResponse(int Id, ProductResponse Product, int Quantity, string UnitPrice);
-public record ProductResponse(int Id, string Name, string Price, ProductCategoryResponse Category);
-public record ProductCategoryResponse(int Id, string Name);
-public record CreateOrderItemRequest(int ProductId, int Quantity, int? OrderId);
-public record UpdateOrderItemRequest(int ProductId, int Quantity);

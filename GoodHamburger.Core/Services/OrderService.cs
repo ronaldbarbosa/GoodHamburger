@@ -10,16 +10,16 @@ public class OrderService : ServiceBase<Order>, IOrderService
 {
     private readonly IOrderRepository _orderOrderItemRepository;
     private readonly IProductRepository _productRepository;
-    private readonly IDiscountCalculator _discountCalculator;
+    private readonly IDiscountCalculatorService _discountCalculatorService;
 
     public OrderService(
         IOrderRepository orderOrderItemRepository,
         IProductRepository productRepository,
-        IDiscountCalculator discountCalculator) : base(orderOrderItemRepository)
+        IDiscountCalculatorService discountCalculatorService) : base(orderOrderItemRepository)
     {
         _orderOrderItemRepository = orderOrderItemRepository;
         _productRepository = productRepository;
-        _discountCalculator = discountCalculator;
+        _discountCalculatorService = discountCalculatorService;
     }
 
     public override async Task<Order> CreateAsync(Order entity)
@@ -105,8 +105,8 @@ public class OrderService : ServiceBase<Order>, IOrderService
 
     public void RecalculateTotals(Order order)
     {
-        order.Subtotal = _discountCalculator.CalculateSubtotal(order);
-        var (discount, _) = _discountCalculator.Calculate(order);
+        order.Subtotal = _discountCalculatorService.CalculateSubtotal(order);
+        var (discount, _) = _discountCalculatorService.Calculate(order);
         order.Discount = discount;
         order.Total = order.Subtotal - discount;
     }

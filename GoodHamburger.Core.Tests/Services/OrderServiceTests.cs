@@ -20,10 +20,10 @@ public class OrderServiceTests
         _orderService = new OrderService(
             _orderRepositoryMock.Object, 
             _productRepositoryMock.Object, 
-            new TestableDiscountCalculator());
+            new TestableDiscountCalculatorService());
     }
 
-    private class TestableDiscountCalculator : DiscountCalculator { }
+    private class TestableDiscountCalculatorService : DiscountCalculatorService { }
 
     private static ProductCategory CreateCategory(int id, string name, bool isActive = true) =>
         new() { Id = id, Name = name, IsActive = isActive };

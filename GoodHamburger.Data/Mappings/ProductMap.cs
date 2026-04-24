@@ -14,6 +14,9 @@ public class ProductMap : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Name)
             .IsRequired()
             .HasMaxLength(150);
+
+        builder.Property(p => p.ImageUrl)
+            .HasMaxLength(2048);
         
         builder.Property(p => p.Price)
             .HasConversion<MoneyConverter>()

@@ -26,7 +26,7 @@ public static class NativeInjectorConfig
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IProductCategoryService, ProductCategoryService>();
         services.AddScoped<IProductService, ProductService>();
-        services.AddScoped<IDiscountCalculator, DiscountCalculator>();
+        services.AddScoped<IDiscountCalculatorService, DiscountCalculatorService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
     }
 }

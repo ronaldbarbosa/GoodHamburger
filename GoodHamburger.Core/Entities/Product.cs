@@ -11,4 +11,5 @@ public class Product : Entity
     public ProductCategory? Category { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
+    public string? ImageUrl { get; set; }
 }

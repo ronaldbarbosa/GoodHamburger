@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using GoodHamburger.Web.Models;
 
 namespace GoodHamburger.Web.Services;
 

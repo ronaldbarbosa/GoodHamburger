@@ -15,7 +15,8 @@ public static class GetProducts
                 p.Id,
                 p.Name,
                 p.Price.ToString(),
-                new ProductCategoryResponse(p.CategoryId, p.Category!.Name)));
+                new ProductCategoryResponse(p.CategoryId, p.Category!.Name),
+                p.ImageUrl));
             
             return Results.Ok(response);
         }
