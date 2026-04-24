@@ -1,4 +1,5 @@
 @page "/products"
+@implements IDisposable
 @inject ProductService ProductService
 @inject ProductCategoryService ProductCategoryService
 @inject CartService CartService
@@ -33,8 +34,13 @@
                     <MudText Typo="Typo.h6" Color="Color.Primary" Class="mt-2">@product.Price</MudText>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" StartIcon="@Icons.Material.Filled.AddShoppingCart" OnClick="() => AddToCart(product)">
-                        Adicionar
+                    <MudButton Variant="Variant.Filled"
+                               Color="@(IsCategoryInCart(product.Category.Name) ? Color.Default : Color.Primary)"
+                               FullWidth="true"
+                               StartIcon="@(IsCategoryInCart(product.Category.Name) ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.AddShoppingCart)"
+                               OnClick="() => AddToCart(product)"
+                               Disabled="@IsCategoryInCart(product.Category.Name)">
+                        @(IsCategoryInCart(product.Category.Name) ? "No carrinho" : "Adicionar")
                     </MudButton>
                 </MudCardActions>
             </MudCard>
@@ -58,6 +64,12 @@
         products = await ProductService.GetAllAsync();
         categories = await ProductCategoryService.GetAllAsync();
         filteredProducts = products;
+        CartService.OnCartChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        CartService.OnCartChanged -= StateHasChanged;
     }
 
     private void OnCategoryChanged(int? categoryId)
@@ -81,9 +93,15 @@
         // };
     }
 
+    private bool IsCategoryInCart(string categoryName) =>
+        CartService.Items.Any(i => i.CategoryName.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
+
     private async Task AddToCart(ProductResponse product)
     {
-        await CartService.AddItemAsync(Http, product.Id, product.Name, product.Category.Name, 1, product.Price);
-        Snackbar.Add($"{product.Name} adicionado ao carrinho!", Severity.Success);
+        var added = await CartService.AddItemAsync(Http, product.Id, product.Name, product.Category.Name, 1, product.Price);
+        if (added)
+            Snackbar.Add($"{product.Name} adicionado ao carrinho!", Severity.Success);
+        else
+            Snackbar.Add($"Já existe um item da categoria '{product.Category.Name}' no carrinho!", Severity.Warning);
     }
 }

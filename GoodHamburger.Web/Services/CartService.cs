@@ -33,14 +33,17 @@ public class CartService
         OnInitialized?.Invoke();
     }
 
-    public async Task AddItemAsync(HttpClient client, int productId, string productName, string categoryName, int quantity, string unitPrice)
+    public async Task<bool> AddItemAsync(HttpClient client, int productId, string productName, string categoryName, int quantity, string unitPrice)
     {
+        if (_items.Any(i => i.CategoryName.Equals(categoryName, StringComparison.OrdinalIgnoreCase)))
+            return false;
+
         if (_currentCart is null)
         {
             var newOrder = new CreateOrderRequest([new CreateOrderItemRequest(productId, quantity, null)]);
             var response = await client.PostAsJsonAsync("/api/orders", newOrder);
             _currentCart = await response.Content.ReadFromJsonAsync<OrderResponse>();
-            
+
             if (_currentCart is not null)
             {
                 _items.Clear();
@@ -52,30 +55,17 @@ public class CartService
             var newItem = new CreateOrderItemRequest(productId, quantity, _currentCart.Id);
             var response = await client.PostAsJsonAsync("/api/order-items", newItem);
             var createdItem = await response.Content.ReadFromJsonAsync<OrderItemResponse>();
-            
+
             if (createdItem is not null)
             {
                 _items.Add(new CartItem(createdItem.Id, productId, productName, categoryName, quantity, unitPrice));
             }
-            
+
             _currentCart = await client.GetFromJsonAsync<OrderResponse>($"/api/orders/{_currentCart.Id}");
         }
-        
-        OnCartChanged?.Invoke();
-    }
 
-    public async Task UpdateQuantityAsync(HttpClient client, int itemId, int quantity)
-    {
-        var item = _items.FirstOrDefault(i => i.Id == itemId);
-        if (item is null) return;
-        
-        await client.PutAsJsonAsync($"/api/order-items/{itemId}", new CartUpdateItemRequest(item.ProductId, quantity));
-        
-        var index = _items.IndexOf(item);
-        _items[index] = item with { Quantity = quantity };
-        
-        _currentCart = await client.GetFromJsonAsync<OrderResponse>($"/api/orders/{_currentCart.Id}");
         OnCartChanged?.Invoke();
+        return true;
     }
 
     public async Task RemoveItemAsync(HttpClient client, int itemId)
@@ -111,4 +101,3 @@ public class CartService
 }
 
 public record CartItem(int Id, int ProductId, string ProductName, string CategoryName, int Quantity, string UnitPrice);
-public record CartUpdateItemRequest(int ProductId, int Quantity);
