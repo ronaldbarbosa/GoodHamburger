@@ -91,6 +91,21 @@ public class OrderServiceTests
     }
 
     [Fact]
+    public async Task CreateAsync_QuantityGreaterThanOne_ThrowsInvalidItemQuantityException()
+    {
+        var sandwich = CreateProduct(1, "X-Burger", 15.00m, 1, "Sanduíches");
+
+        var order = new Order
+        {
+            Items = new List<OrderItem> { new() { Id = 1, ProductId = 1, Quantity = 2 } }
+        };
+
+        _productRepositoryMock.Setup(p => p.GetByIdAsync(1)).ReturnsAsync(sandwich);
+
+        await Assert.ThrowsAsync<InvalidItemQuantityException>(() => _orderService.CreateAsync(order));
+    }
+
+    [Fact]
     public async Task CreateAsync_DuplicateCategories_ThrowsDuplicateItemException()
     {
         var sandwich = CreateProduct(1, "X-Burger", 15.00m, 1, "Sanduíches");

@@ -99,7 +99,7 @@ public class OrderService : ServiceBase<Order>, IOrderService
 
     public void ValidateProductQuantity(IEnumerable<OrderItem> orderItems)
     {
-        if (orderItems.Any(i => i.Quantity < 1))
+        if (orderItems.Any(i => i.Quantity != 1))
             throw new InvalidItemQuantityException();
     }
 
