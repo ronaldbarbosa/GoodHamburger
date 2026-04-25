@@ -1,59 +1,65 @@
 using System.Text.Json;
 using GoodHamburger.Api.Models.Responses;
-using Microsoft.AspNetCore.Http;
+using GoodHamburger.Core.Exceptions;
 
 namespace GoodHamburger.Api.Middleware;
 
-public class ExceptionHandlerMiddleware
+public class ExceptionHandlerMiddleware(RequestDelegate next, ILogger<ExceptionHandlerMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ExceptionHandlerMiddleware> _logger;
-
-    public ExceptionHandlerMiddleware(RequestDelegate next, ILogger<ExceptionHandlerMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         try
         {
-            await _next(context);
+            await next(context);
+        }
+        catch (OperationCanceledException)
+        {
+            // requisição cancelada pelo cliente — não logar como erro
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro não tratado: {Message}", ex.Message);
             await HandleExceptionAsync(context, ex);
         }
     }
 
-    private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
+    private async Task HandleExceptionAsync(HttpContext context, Exception ex)
     {
         context.Response.ContentType = "application/json";
-        
-var response = ex switch
-        {
-            System.Text.Json.JsonException => new ErrorResponse("Formato inválido. Verifique o JSON enviado e tente novamente."),
-            ArgumentException => new ErrorResponse($"Dados inválidos: {ex.Message}"),
-            FormatException => new ErrorResponse($"Formato inválido: {ex.Message}"),
-            BadHttpRequestException => new ErrorResponse("Dados inválidos na requisição. Verifique o formato e tente novamente."),
-            _ => new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes.")
-        };
-        
-        context.Response.StatusCode = ex is System.Text.Json.JsonException or ArgumentException or FormatException or BadHttpRequestException
-            ? StatusCodes.Status400BadRequest
-            : StatusCodes.Status500InternalServerError;
-        
         var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-        await context.Response.WriteAsync(JsonSerializer.Serialize(response, options));
+
+        switch (ex)
+        {
+            case EntityNotFoundException e:
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                var notFound = new ValidationResponse([new ValidationItemResponse(e.EntityType, e.Message)]);
+                await context.Response.WriteAsync(JsonSerializer.Serialize(notFound, options));
+                return;
+
+            case DuplicateItemException or BusinessRuleViolationException or InvalidItemQuantityException:
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                var field = ex is InvalidItemQuantityException iqe ? iqe.EntityType : string.Empty;
+                var business = new ValidationResponse([new ValidationItemResponse(field, ex.Message)]);
+                await context.Response.WriteAsync(JsonSerializer.Serialize(business, options));
+                return;
+
+            case JsonException or FormatException or BadHttpRequestException:
+                context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                var badRequest = new ErrorResponse("Formato inválido. Verifique os dados enviados e tente novamente.");
+                await context.Response.WriteAsync(JsonSerializer.Serialize(badRequest, options));
+                return;
+
+            default:
+                logger.LogError(ex, "Erro não tratado: {Message}", ex.Message);
+                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                var error = new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes.");
+                await context.Response.WriteAsync(JsonSerializer.Serialize(error, options));
+                return;
+        }
     }
 }
 
 public static class ExceptionHandlerMiddlewareExtensions
 {
-    public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app)
-    {
-        return app.UseMiddleware<ExceptionHandlerMiddleware>();
-    }
+    public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app) =>
+        app.UseMiddleware<ExceptionHandlerMiddleware>();
 }

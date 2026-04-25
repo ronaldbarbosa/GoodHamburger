@@ -10,28 +10,21 @@ public static class GetProduct
         int id,
         CancellationToken ct)
     {
-        try
+        var product = await productService.GetByIdAsync(id, ct);
+
+        if (product is null)
         {
-            var product = await productService.GetByIdAsync(id, ct);
-            
-            if (product is null)
-            {
-                var validation = new ValidationResponse([new ValidationItemResponse("orderId", "Produto não  encontrado.")]);
-                return Results.NotFound(validation);
-            }
-            
-            var response = new ProductResponse(
-                product.Id,
-                product.Name,
-                product.Price.ToString(),
-                new ProductCategoryResponse(product.CategoryId, product.Category!.Name),
-                product.ImageUrl);
-            
-            return Results.Ok(response);
+            var validation = new ValidationResponse([new ValidationItemResponse("id", "Produto não encontrado.")]);
+            return Results.NotFound(validation);
         }
-        catch (Exception)
-        {
-            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
-        }
+
+        var response = new ProductResponse(
+            product.Id,
+            product.Name,
+            product.Price.ToString(),
+            new ProductCategoryResponse(product.CategoryId, product.Category!.Name),
+            product.ImageUrl);
+
+        return Results.Ok(response);
     }
 }

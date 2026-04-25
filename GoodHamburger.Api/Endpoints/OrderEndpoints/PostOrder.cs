@@ -1,7 +1,6 @@
 using GoodHamburger.Api.Models.Requests;
 using GoodHamburger.Api.Models.Responses;
 using GoodHamburger.Core.Entities;
-using GoodHamburger.Core.Exceptions;
 using GoodHamburger.Core.Interfaces.Services;
 
 namespace GoodHamburger.Api.Endpoints.OrderEndpoints;
@@ -13,57 +12,35 @@ public static class PostOrder
         CreateOrderRequest request,
         CancellationToken ct)
     {
-        try
+        var order = new Order
         {
-            var order = new Order
+            Items = request.Items!.Select(i => new OrderItem
             {
-                Items = request.Items?.Select(i => new OrderItem
-                {
-                    ProductId = i.ProductId,
-                    Quantity = i.Quantity
-                }).ToList() ?? []
-            };
+                ProductId = i.ProductId,
+                Quantity = i.Quantity
+            }).ToList()
+        };
 
-            var orderResult = await orderService.CreateAsync(order, ct);
-            
-            var response = new OrderResponse(
-                orderResult.Id,
-                orderResult.Items.Select(oi => new OrderItemResponse(
-                    oi.Id,
-                    new ProductResponse(
-                        oi.ProductId,
-                        oi.Product!.Name,
-                        oi.Product!.Price.ToString(),
-                        new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
+        var result = await orderService.CreateAsync(order, ct);
+
+        var response = new OrderResponse(
+            result.Id,
+            result.Items.Select(oi => new OrderItemResponse(
+                oi.Id,
+                new ProductResponse(
+                    oi.ProductId,
+                    oi.Product!.Name,
+                    oi.Product!.Price.ToString(),
+                    new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
                     oi.Product!.ImageUrl),
-                    oi.Quantity,
-                    oi.UnitPrice.ToString())).ToList(),
-                orderResult.Subtotal.ToString(),
-                orderResult.Discount.ToString(),
-                orderResult.Total.ToString(),
-                orderResult.CreatedAt,
-                orderResult.Status.ToString());
-            
-            return Results.Created($"/api/orders/{orderResult.Id}", response);
-        }
-        catch (EntityNotFoundException ex)
-        {
-            var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
-            return Results.BadRequest(validation);
-        }
-        catch (InvalidItemQuantityException ex)
-        {
-            var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
-            return Results.BadRequest(validation);
-        }
-        catch (Exception ex) when(ex is DuplicateItemException or BusinessRuleViolationException)
-        {
-            var validation = new ValidationResponse([new ValidationItemResponse("", ex.Message)]);
-            return Results.BadRequest(validation);
-        }
-        catch (Exception)
-        {
-            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
-        }
+                oi.Quantity,
+                oi.UnitPrice.ToString())).ToList(),
+            result.Subtotal.ToString(),
+            result.Discount.ToString(),
+            result.Total.ToString(),
+            result.CreatedAt,
+            result.Status.ToString());
+
+        return Results.Created($"/api/orders/{result.Id}", response);
     }
 }

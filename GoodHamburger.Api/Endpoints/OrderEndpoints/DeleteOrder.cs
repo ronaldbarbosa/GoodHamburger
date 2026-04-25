@@ -11,29 +11,22 @@ public static class DeleteOrder
         int id,
         CancellationToken ct)
     {
-        try
+        var existingOrder = await orderService.GetByIdAsync(id, ct);
+
+        if (existingOrder is null)
         {
-            var existingOrder = await orderService.GetByIdAsync(id, ct);
-
-            if (existingOrder is null)
-            {
-                var validation = new ValidationResponse([new ValidationItemResponse("id", "Pedido não encontrado.")]);
-                return Results.NotFound(validation);
-            }
-
-            if (existingOrder.Status != OrderStatus.Cancelled)
-            {
-                var validation = new ValidationResponse([new ValidationItemResponse("status", "Apenas pedidos cancelados podem ser excluídos.")]);
-                return Results.BadRequest(validation);
-            }
-
-            await orderService.DeleteAsync(id, ct);
-
-            return Results.NoContent();
+            var validation = new ValidationResponse([new ValidationItemResponse("id", "Pedido não encontrado.")]);
+            return Results.NotFound(validation);
         }
-        catch (Exception)
+
+        if (existingOrder.Status != OrderStatus.Cancelled)
         {
-            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
+            var validation = new ValidationResponse([new ValidationItemResponse("status", "Apenas pedidos cancelados podem ser excluídos.")]);
+            return Results.BadRequest(validation);
         }
+
+        await orderService.DeleteAsync(id, ct);
+
+        return Results.NoContent();
     }
 }

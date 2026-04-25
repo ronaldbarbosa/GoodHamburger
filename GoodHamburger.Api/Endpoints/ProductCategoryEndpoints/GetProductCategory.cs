@@ -10,23 +10,16 @@ public static class GetProductCategory
         int id,
         CancellationToken ct)
     {
-        try
+        var category = await productCategoryService.GetByIdAsync(id, ct);
+
+        if (category is null)
         {
-            var category = await productCategoryService.GetByIdAsync(id, ct);
-            
-            if (category is null)
-            {
-                var validation = new ValidationResponse([new ValidationItemResponse("id", "Categoria não encontrada.")]);
-                return Results.NotFound(validation);
-            }
-            
-            var response = new ProductCategoryResponse(category.Id, category.Name);
-            
-            return Results.Ok(response);
+            var validation = new ValidationResponse([new ValidationItemResponse("id", "Categoria não encontrada.")]);
+            return Results.NotFound(validation);
         }
-        catch (Exception)
-        {
-            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
-        }
+
+        var response = new ProductCategoryResponse(category.Id, category.Name);
+
+        return Results.Ok(response);
     }
 }

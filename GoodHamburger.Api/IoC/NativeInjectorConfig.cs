@@ -1,3 +1,4 @@
+using FluentValidation;
 using GoodHamburger.Core.Interfaces;
 using GoodHamburger.Core.Interfaces.Repositories;
 using GoodHamburger.Core.Interfaces.Services;
@@ -13,6 +14,8 @@ public static class NativeInjectorConfig
 {
     public static void RegisterServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddValidatorsFromAssembly(typeof(NativeInjectorConfig).Assembly);
+
         services.AddDbContext<DataContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("GoodHamburgerConnection"))
         );

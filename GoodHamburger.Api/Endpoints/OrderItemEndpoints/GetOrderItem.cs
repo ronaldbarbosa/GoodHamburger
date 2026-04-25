@@ -1,6 +1,4 @@
 using GoodHamburger.Api.Models.Responses;
-using GoodHamburger.Core.Entities;
-using GoodHamburger.Core.Exceptions;
 using GoodHamburger.Core.Interfaces.Services;
 
 namespace GoodHamburger.Api.Endpoints.OrderItemEndpoints;
@@ -12,32 +10,25 @@ public static class GetOrderItem
         int id,
         CancellationToken ct)
     {
-        try
+        var orderItem = await orderItemService.GetByIdAsync(id, ct);
+
+        if (orderItem is null)
         {
-            var orderItem = await orderItemService.GetByIdAsync(id, ct);
-            
-            if (orderItem is null)
-            {
-                var validation = new ValidationResponse([new ValidationItemResponse("id", "Item do pedido não foi encontrado.")]);
-                return Results.NotFound(validation);
-            }
-            
-            var response = new OrderItemResponse(
-                orderItem.Id,
-                new ProductResponse(
-                    orderItem.ProductId, 
-                    orderItem.Product!.Name,
-                    orderItem.Product.Price.ToString(),
-                    new ProductCategoryResponse(orderItem.Product!.CategoryId, orderItem.Product!.Category!.Name),
+            var validation = new ValidationResponse([new ValidationItemResponse("id", "Item do pedido não foi encontrado.")]);
+            return Results.NotFound(validation);
+        }
+
+        var response = new OrderItemResponse(
+            orderItem.Id,
+            new ProductResponse(
+                orderItem.ProductId,
+                orderItem.Product!.Name,
+                orderItem.Product.Price.ToString(),
+                new ProductCategoryResponse(orderItem.Product!.CategoryId, orderItem.Product!.Category!.Name),
                 orderItem.Product!.ImageUrl),
-                orderItem.Quantity,
-                orderItem.UnitPrice.ToString());
-            
-            return Results.Ok(response);
-        }
-        catch (Exception)
-        {
-            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
-        }
+            orderItem.Quantity,
+            orderItem.UnitPrice.ToString());
+
+        return Results.Ok(response);
     }
 }

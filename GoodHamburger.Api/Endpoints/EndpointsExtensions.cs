@@ -2,6 +2,8 @@ using GoodHamburger.Api.Endpoints.OrderEndpoints;
 using GoodHamburger.Api.Endpoints.OrderItemEndpoints;
 using GoodHamburger.Api.Endpoints.ProductCategoryEndpoints;
 using GoodHamburger.Api.Endpoints.ProductEndpoints;
+using GoodHamburger.Api.Filters;
+using GoodHamburger.Api.Models.Requests;
 using GoodHamburger.Api.Models.Responses;
 
 namespace GoodHamburger.Api.Endpoints;
@@ -14,6 +16,7 @@ public static class EndpointsExtensions
             .WithTags("Itens do Pedido");
 
         group.MapPost("", PostOrderItem.Handle)
+            .AddEndpointFilter<ValidationEndpointFilter<CreateOrderItemRequest>>()
             .WithDisplayName("CriarItemPedido")
             .WithDescription("Criar um item relacionado a um pedido")
             .Produces<OrderItemResponse>(StatusCodes.Status201Created)
@@ -34,6 +37,7 @@ public static class EndpointsExtensions
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         group.MapPut("/{id}", UpdateOrderItem.Handle)
+            .AddEndpointFilter<ValidationEndpointFilter<UpdateOrderItemRequest>>()
             .WithDisplayName("AtualizarItemPedido")
             .WithDescription("Atualizar um item de pedido")
             .Produces<OrderItemResponse>()
@@ -50,13 +54,14 @@ public static class EndpointsExtensions
 
         return app;
     }
-    
+
     public static WebApplication MapOrderEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("/api/orders")
             .WithTags("Pedidos");
 
         group.MapPost("", PostOrder.Handle)
+            .AddEndpointFilter<ValidationEndpointFilter<CreateOrderRequest>>()
             .WithDisplayName("CriarPedido")
             .WithDescription("Criar um novo pedido")
             .Produces<OrderResponse>(StatusCodes.Status201Created)
@@ -77,6 +82,7 @@ public static class EndpointsExtensions
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         group.MapPut("/{id}", UpdateOrder.Handle)
+            .AddEndpointFilter<ValidationEndpointFilter<UpdateOrderRequest>>()
             .WithDisplayName("AtualizarPedido")
             .WithDescription("Atualizar um pedido")
             .Produces<OrderResponse>()
@@ -108,6 +114,7 @@ public static class EndpointsExtensions
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         group.MapPatch("/{id}/status", UpdateOrderStatus.Handle)
+            .AddEndpointFilter<ValidationEndpointFilter<UpdateOrderStatusRequest>>()
             .WithDisplayName("AlterarStatusPedido")
             .WithDescription("Avançar o status de um pedido na progressão")
             .Produces<OrderResponse>()
@@ -117,7 +124,7 @@ public static class EndpointsExtensions
 
         return app;
     }
-    
+
     public static WebApplication MapProductCategoryEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("/api/product-categories")
@@ -138,7 +145,7 @@ public static class EndpointsExtensions
 
         return app;
     }
-    
+
     public static WebApplication MapProductEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("/api/products")

@@ -1,7 +1,6 @@
 using GoodHamburger.Api.Models.Requests;
 using GoodHamburger.Api.Models.Responses;
 using GoodHamburger.Core.Entities;
-using GoodHamburger.Core.Exceptions;
 using GoodHamburger.Core.Interfaces.Services;
 
 namespace GoodHamburger.Api.Endpoints.OrderEndpoints;
@@ -14,65 +13,40 @@ public static class UpdateOrder
         UpdateOrderRequest request,
         CancellationToken ct)
     {
-        try
+        var existingOrder = await orderService.GetByIdAsync(id, ct);
+
+        if (existingOrder is null)
         {
-            var existingOrder = await orderService.GetByIdAsync(id, ct);
+            var validation = new ValidationResponse([new ValidationItemResponse("id", "Pedido não encontrado.")]);
+            return Results.NotFound(validation);
+        }
 
-            if (existingOrder is null)
-            {
-                var validation = new ValidationResponse([new ValidationItemResponse("id", "Pedido não encontrado.")]);
-                return Results.NotFound(validation);
-            }
+        existingOrder.Items = request.Items!.Select(i => new OrderItem
+        {
+            ProductId = i.ProductId,
+            Quantity = i.Quantity
+        }).ToList();
 
-            if (request.Items is not null)
-            {
-                existingOrder.Items = request.Items.Select(i => new OrderItem
-                {
-                    ProductId = i.ProductId,
-                    Quantity = i.Quantity
-                }).ToList();
-            }
+        await orderService.UpdateAsync(existingOrder, ct);
 
-            await orderService.UpdateAsync(existingOrder, ct);
-
-            var response = new OrderResponse(
-                existingOrder.Id,
-                existingOrder.Items.Select(oi => new OrderItemResponse(
-                    oi.Id,
-                    new ProductResponse(
-                        oi.ProductId,
-                        oi.Product!.Name,
-                        oi.Product!.Price.ToString(),
-                        new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
+        var response = new OrderResponse(
+            existingOrder.Id,
+            existingOrder.Items.Select(oi => new OrderItemResponse(
+                oi.Id,
+                new ProductResponse(
+                    oi.ProductId,
+                    oi.Product!.Name,
+                    oi.Product!.Price.ToString(),
+                    new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
                     oi.Product!.ImageUrl),
-                    oi.Quantity,
-                    oi.UnitPrice.ToString())).ToList(),
-                existingOrder.Subtotal.ToString(),
-                existingOrder.Discount.ToString(),
-                existingOrder.Total.ToString(),
-                existingOrder.CreatedAt,
-                existingOrder.Status.ToString());
+                oi.Quantity,
+                oi.UnitPrice.ToString())).ToList(),
+            existingOrder.Subtotal.ToString(),
+            existingOrder.Discount.ToString(),
+            existingOrder.Total.ToString(),
+            existingOrder.CreatedAt,
+            existingOrder.Status.ToString());
 
-            return Results.Ok(response);
-        }
-        catch (EntityNotFoundException ex)
-        {
-            var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
-            return Results.BadRequest(validation);
-        }
-        catch (InvalidItemQuantityException ex)
-        {
-            var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
-            return Results.BadRequest(validation);
-        }
-        catch (Exception ex) when (ex is DuplicateItemException or BusinessRuleViolationException)
-        {
-            var validation = new ValidationResponse([new ValidationItemResponse("", ex.Message)]);
-            return Results.BadRequest(validation);
-        }
-        catch (Exception)
-        {
-            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
-        }
+        return Results.Ok(response);
     }
 }

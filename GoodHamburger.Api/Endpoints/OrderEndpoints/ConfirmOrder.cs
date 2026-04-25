@@ -1,6 +1,5 @@
 using GoodHamburger.Api.Models.Responses;
 using GoodHamburger.Core.Entities;
-using GoodHamburger.Core.Exceptions;
 using GoodHamburger.Core.Interfaces.Services;
 
 namespace GoodHamburger.Api.Endpoints.OrderEndpoints;
@@ -12,53 +11,41 @@ public static class ConfirmOrder
         int id,
         CancellationToken ct)
     {
-        try
+        var order = await orderService.GetByIdAsync(id, ct);
+
+        if (order is null)
         {
-            var order = await orderService.GetByIdAsync(id, ct);
-
-            if (order is null)
-            {
-                var validation = new ValidationResponse([new ValidationItemResponse("id", "Pedido não encontrado.")]);
-                return Results.NotFound(validation);
-            }
-
-            if (order.Status != OrderStatus.Pending)
-            {
-                var validation = new ValidationResponse([new ValidationItemResponse("status", "Apenas pedidos pendentes podem ser confirmados.")]);
-                return Results.BadRequest(validation);
-            }
-
-            order.Status = OrderStatus.Confirmed;
-            await orderService.UpdateAsync(order, ct);
-
-            var response = new OrderResponse(
-                order.Id,
-                order.Items.Select(oi => new OrderItemResponse(
-                    oi.Id,
-                    new ProductResponse(
-                        oi.ProductId,
-                        oi.Product!.Name,
-                        oi.Product!.Price.ToString(),
-                        new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
-                    oi.Product!.ImageUrl),
-                    oi.Quantity,
-                    oi.UnitPrice.ToString())).ToList(),
-                order.Subtotal.ToString(),
-                order.Discount.ToString(),
-                order.Total.ToString(),
-                order.CreatedAt,
-                order.Status.ToString());
-
-            return Results.Ok(response);
+            var validation = new ValidationResponse([new ValidationItemResponse("id", "Pedido não encontrado.")]);
+            return Results.NotFound(validation);
         }
-        catch (Exception ex) when (ex is BusinessRuleViolationException or EntityNotFoundException)
+
+        if (order.Status != OrderStatus.Pending)
         {
-            var validation = new ValidationResponse([new ValidationItemResponse("", ex.Message)]);
+            var validation = new ValidationResponse([new ValidationItemResponse("status", "Apenas pedidos pendentes podem ser confirmados.")]);
             return Results.BadRequest(validation);
         }
-        catch (Exception)
-        {
-            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
-        }
+
+        order.Status = OrderStatus.Confirmed;
+        await orderService.UpdateAsync(order, ct);
+
+        var response = new OrderResponse(
+            order.Id,
+            order.Items.Select(oi => new OrderItemResponse(
+                oi.Id,
+                new ProductResponse(
+                    oi.ProductId,
+                    oi.Product!.Name,
+                    oi.Product!.Price.ToString(),
+                    new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
+                    oi.Product!.ImageUrl),
+                oi.Quantity,
+                oi.UnitPrice.ToString())).ToList(),
+            order.Subtotal.ToString(),
+            order.Discount.ToString(),
+            order.Total.ToString(),
+            order.CreatedAt,
+            order.Status.ToString());
+
+        return Results.Ok(response);
     }
 }

@@ -1,7 +1,6 @@
 using GoodHamburger.Api.Models.Requests;
 using GoodHamburger.Api.Models.Responses;
 using GoodHamburger.Core.Entities;
-using GoodHamburger.Core.Exceptions;
 using GoodHamburger.Core.Interfaces.Services;
 
 namespace GoodHamburger.Api.Endpoints.OrderItemEndpoints;
@@ -13,48 +12,26 @@ public static class PostOrderItem
         CreateOrderItemRequest request,
         CancellationToken ct)
     {
-        try
+        var orderItem = new OrderItem
         {
-            var orderItem = new OrderItem
-            {
-                OrderId = request.OrderId,
-                ProductId = request.ProductId,
-                Quantity = request.Quantity
-            };
+            OrderId = request.OrderId,
+            ProductId = request.ProductId,
+            Quantity = request.Quantity
+        };
 
-            var orderItemResult = await orderItemService.CreateAsync(orderItem, ct);
-            
-            var response = new OrderItemResponse(
-                orderItemResult.Id,
-                new ProductResponse(
-                    orderItemResult.ProductId, 
-                    orderItemResult.Product!.Name,
-                    orderItemResult.Product.Price.ToString(),
-                    new ProductCategoryResponse(orderItemResult.Product!.CategoryId, orderItemResult.Product!.Category!.Name),
-                orderItemResult.Product!.ImageUrl),
-                orderItemResult.Quantity,
-                orderItemResult.UnitPrice.ToString());
-            
-            return Results.Created($"/api/order-items/{orderItemResult.Id}", response);
-        }
-        catch (EntityNotFoundException ex)
-        {
-            var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
-            return Results.BadRequest(validation);
-        }
-        catch (InvalidItemQuantityException ex)
-        {
-            var validation = new ValidationResponse([new ValidationItemResponse(ex.EntityType, ex.Message)]);
-            return Results.BadRequest(validation);
-        }
-        catch (Exception ex) when(ex is DuplicateItemException or BusinessRuleViolationException)
-        {
-            var validation = new ValidationResponse([new ValidationItemResponse("", ex.Message)]);
-            return Results.BadRequest(validation);
-        }
-        catch (Exception)
-        {
-            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
-        }
+        var result = await orderItemService.CreateAsync(orderItem, ct);
+
+        var response = new OrderItemResponse(
+            result.Id,
+            new ProductResponse(
+                result.ProductId,
+                result.Product!.Name,
+                result.Product.Price.ToString(),
+                new ProductCategoryResponse(result.Product!.CategoryId, result.Product!.Category!.Name),
+                result.Product!.ImageUrl),
+            result.Quantity,
+            result.UnitPrice.ToString());
+
+        return Results.Created($"/api/order-items/{result.Id}", response);
     }
 }

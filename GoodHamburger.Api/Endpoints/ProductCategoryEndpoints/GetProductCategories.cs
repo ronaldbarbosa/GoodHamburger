@@ -7,18 +7,8 @@ public static class GetProductCategories
 {
     public static async Task<IResult> Handle(IProductCategoryService productCategoryService, CancellationToken ct)
     {
-        try
-        {
-            var categories = await productCategoryService.GetAllAsync(ct);
-            
-            var response = 
-                categories.Select(c => new ProductCategoryResponse(c.Id, c.Name));
-            
-            return Results.Ok(response);
-        }
-        catch (Exception)
-        {
-            return Results.InternalServerError(new ErrorResponse("Erro ao processar solicitação. Tente novamente em alguns instantes."));
-        }
+        var categories = await productCategoryService.GetAllAsync(ct);
+        var response = categories.Select(c => new ProductCategoryResponse(c.Id, c.Name));
+        return Results.Ok(response);
     }
 }
