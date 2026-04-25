@@ -28,7 +28,7 @@ public static class GetProducts
                 paged.Items.Select(p => new ProductResponse(
                     p.Id,
                     p.Name,
-                    p.Price.ToString(),
+                    p.Price.Amount,
                     new ProductCategoryResponse(p.CategoryId, p.Category!.Name),
                     p.ImageUrl)).ToList(),
                 paged.TotalItemCount,

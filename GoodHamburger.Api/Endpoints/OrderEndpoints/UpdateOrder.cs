@@ -36,14 +36,14 @@ public static class UpdateOrder
                 new ProductResponse(
                     oi.ProductId,
                     oi.Product!.Name,
-                    oi.Product!.Price.ToString(),
+                    oi.Product!.Price.Amount,
                     new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
                     oi.Product!.ImageUrl),
                 oi.Quantity,
-                oi.UnitPrice.ToString())).ToList(),
-            existingOrder.Subtotal.ToString(),
-            existingOrder.Discount.ToString(),
-            existingOrder.Total.ToString(),
+                oi.UnitPrice.Amount)).ToList(),
+            existingOrder.Subtotal.Amount,
+            existingOrder.Discount.Amount,
+            existingOrder.Total.Amount,
             existingOrder.CreatedAt,
             existingOrder.Status.ToString());
 

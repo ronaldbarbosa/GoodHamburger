@@ -30,11 +30,11 @@ public static class UpdateOrderItem
             new ProductResponse(
                 existingOrderItem.ProductId,
                 existingOrderItem.Product!.Name,
-                existingOrderItem.Product.Price.ToString(),
+                existingOrderItem.Product.Price.Amount,
                 new ProductCategoryResponse(existingOrderItem.Product!.CategoryId, existingOrderItem.Product!.Category!.Name),
                 existingOrderItem.Product!.ImageUrl),
             existingOrderItem.Quantity,
-            existingOrderItem.UnitPrice.ToString());
+            existingOrderItem.UnitPrice.Amount);
 
         return Results.Ok(response);
     }

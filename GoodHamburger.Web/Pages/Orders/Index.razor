@@ -37,17 +37,17 @@
             </MudTd>
             <MudTd>
                 <MudText Style="@(context.Status == "Cancelled" ? "opacity: 0.5;" : "")">
-                    @context.Subtotal
+                    R$ @context.Subtotal
                 </MudText>
             </MudTd>
             <MudTd>
                 <MudText Style="@(context.Status == "Cancelled" ? "opacity: 0.5;" : "")">
-                    @context.Discount
+                    R$ @context.Discount
                 </MudText>
             </MudTd>
             <MudTd>
                 <MudText Style="@(context.Status == "Cancelled" ? "opacity: 0.5;" : "")">
-                    @context.Total
+                    R$ @context.Total
                 </MudText>
             </MudTd>
             <MudTd>
@@ -107,7 +107,7 @@
         var paged = await OrderService.GetPagedAsync(state.Page + 1, state.PageSize);
         return new TableData<OrderResponse>
         {
-            Items = paged.Items,
+            Items = paged.Items.Where(i => i.Status.ToLower() != "pending"),
             TotalItems = paged.TotalItemCount
         };
     }

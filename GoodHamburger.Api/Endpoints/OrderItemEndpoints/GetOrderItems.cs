@@ -30,11 +30,11 @@ public static class GetOrderItems
                     new ProductResponse(
                         oi.ProductId,
                         oi.Product!.Name,
-                        oi.Product.Price.ToString(),
+                        oi.Product.Price.Amount,
                         new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
                         oi.Product!.ImageUrl),
                     oi.Quantity,
-                    oi.UnitPrice.ToString())).ToList(),
+                    oi.UnitPrice.Amount)).ToList(),
                 paged.TotalItemCount,
                 paged.PageNumber,
                 paged.PageSize);

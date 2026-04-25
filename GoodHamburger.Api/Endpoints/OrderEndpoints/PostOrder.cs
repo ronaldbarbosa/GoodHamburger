@@ -30,14 +30,14 @@ public static class PostOrder
                 new ProductResponse(
                     oi.ProductId,
                     oi.Product!.Name,
-                    oi.Product!.Price.ToString(),
+                    oi.Product!.Price.Amount,
                     new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
                     oi.Product!.ImageUrl),
                 oi.Quantity,
-                oi.UnitPrice.ToString())).ToList(),
-            result.Subtotal.ToString(),
-            result.Discount.ToString(),
-            result.Total.ToString(),
+                oi.UnitPrice.Amount)).ToList(),
+            result.Subtotal.Amount,
+            result.Discount.Amount,
+            result.Total.Amount,
             result.CreatedAt,
             result.Status.ToString());
 

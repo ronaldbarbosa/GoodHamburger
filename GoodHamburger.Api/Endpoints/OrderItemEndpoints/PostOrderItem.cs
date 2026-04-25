@@ -26,11 +26,11 @@ public static class PostOrderItem
             new ProductResponse(
                 result.ProductId,
                 result.Product!.Name,
-                result.Product.Price.ToString(),
+                result.Product.Price.Amount,
                 new ProductCategoryResponse(result.Product!.CategoryId, result.Product!.Category!.Name),
                 result.Product!.ImageUrl),
             result.Quantity,
-            result.UnitPrice.ToString());
+            result.UnitPrice.Amount);
 
         return Results.Created($"/api/order-items/{result.Id}", response);
     }

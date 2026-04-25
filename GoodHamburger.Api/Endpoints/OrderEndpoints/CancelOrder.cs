@@ -35,14 +35,14 @@ public static class CancelOrder
                 new ProductResponse(
                     oi.ProductId,
                     oi.Product!.Name,
-                    oi.Product!.Price.ToString(),
+                    oi.Product!.Price.Amount,
                     new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
                     oi.Product!.ImageUrl),
                 oi.Quantity,
-                oi.UnitPrice.ToString())).ToList(),
-            order.Subtotal.ToString(),
-            order.Discount.ToString(),
-            order.Total.ToString(),
+                oi.UnitPrice.Amount)).ToList(),
+            order.Subtotal.Amount,
+            order.Discount.Amount,
+            order.Total.Amount,
             order.CreatedAt,
             order.Status.ToString());
 

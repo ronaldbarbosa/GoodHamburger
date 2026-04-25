@@ -35,7 +35,7 @@
                 <MudDivider Class="my-3" />
                 <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                     <MudText Typo="Typo.subtitle2">Total</MudText>
-                    <MudText Typo="Typo.subtitle2">@(CartService.CurrentCart?.Total ?? "R$ 0,00")</MudText>
+                    <MudText Typo="Typo.subtitle2">@($"R$ {CartService.CurrentCart?.Total}" ?? "R$ 0,00")</MudText>
                 </div>
             }
 

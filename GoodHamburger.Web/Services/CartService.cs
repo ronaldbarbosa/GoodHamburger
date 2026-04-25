@@ -27,7 +27,7 @@ public class CartService
             _items.Clear();
             foreach (var item in pendingOrder.Items)
             {
-                _items.Add(new CartItem(item.Id, item.Product.Id, item.Product.Name, item.Product.Category.Name, item.Quantity, item.UnitPrice, item.ImageUrl));
+                _items.Add(new CartItem(item.Id, item.Product.Id, item.Product.Name, item.Product.Category.Name, item.Quantity, item.UnitPrice, item.Product.ImageUrl));
             }
         }
         _initialized = true;
@@ -35,7 +35,7 @@ public class CartService
         OnInitialized?.Invoke();
     }
 
-    public async Task<bool> AddItemAsync(HttpClient client, int productId, string productName, string categoryName, int quantity, string unitPrice, string? imageUrl)
+    public async Task<bool> AddItemAsync(HttpClient client, int productId, string productName, string categoryName, int quantity, decimal unitPrice, string? imageUrl)
     {
         if (_items.Any(i => i.CategoryName.Equals(categoryName, StringComparison.OrdinalIgnoreCase)))
             return false;

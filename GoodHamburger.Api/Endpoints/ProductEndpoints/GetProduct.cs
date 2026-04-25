@@ -21,7 +21,7 @@ public static class GetProduct
         var response = new ProductResponse(
             product.Id,
             product.Name,
-            product.Price.ToString(),
+            product.Price.Amount,
             new ProductCategoryResponse(product.CategoryId, product.Category!.Name),
             product.ImageUrl);
 

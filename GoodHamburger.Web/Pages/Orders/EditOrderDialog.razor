@@ -30,7 +30,7 @@
                     @foreach (var product in _productsByCategory[category.Id])
                     {
                         <MudSelectItem T="int?" Value="@((int?)product.Id)">
-                            @product.Name — @product.Price
+                            @product.Name — R$ @product.Price
                         </MudSelectItem>
                     }
                 </MudSelect>

@@ -33,7 +33,7 @@ else
                         </MudItem>
                         <MudItem xs="6">
                             <MudText Typo="Typo.h6">@item.ProductName</MudText>
-                            <MudText Typo="Typo.caption" Color="Color.Default">@item.UnitPrice</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Default">R$ @item.UnitPrice</MudText>
                         </MudItem>
                         <MudItem xs="4" Style="text-align: right;">
                             <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="() => RemoveItem(item)" />
@@ -53,21 +53,21 @@ else
                         <MudText>Subtotal</MudText>
                     </MudItem>
                     <MudItem xs="4" Style="text-align: right;">
-                        <MudText>@(CartService.CurrentCart?.Subtotal ?? "R$ 0,00")</MudText>
+                        <MudText>@($"R$ {CartService.CurrentCart?.Subtotal}")</MudText>
                     </MudItem>
                     
                     <MudItem xs="8">
                         <MudText>Desconto</MudText>
                     </MudItem>
                     <MudItem xs="4" Style="text-align: right;">
-                        <MudText>@(CartService.CurrentCart?.Discount ?? "R$ 0,00")</MudText>
+                        <MudText>@($"R$ {CartService.CurrentCart?.Discount}")</MudText>
                     </MudItem>
                     
                     <MudItem xs="8">
                         <MudText Typo="Typo.h6">Total</MudText>
                     </MudItem>
                     <MudItem xs="4" Style="text-align: right;">
-                        <MudText Typo="Typo.h6">@(CartService.CurrentCart?.Total ?? "R$ 0,00")</MudText>
+                        <MudText Typo="Typo.h6">@($"R$ {CartService.CurrentCart?.Total}")</MudText>
                     </MudItem>
                 </MudGrid>
                 

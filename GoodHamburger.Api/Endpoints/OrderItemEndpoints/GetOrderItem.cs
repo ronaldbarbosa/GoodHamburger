@@ -23,11 +23,11 @@ public static class GetOrderItem
             new ProductResponse(
                 orderItem.ProductId,
                 orderItem.Product!.Name,
-                orderItem.Product.Price.ToString(),
+                orderItem.Product.Price.Amount,
                 new ProductCategoryResponse(orderItem.Product!.CategoryId, orderItem.Product!.Category!.Name),
                 orderItem.Product!.ImageUrl),
             orderItem.Quantity,
-            orderItem.UnitPrice.ToString());
+            orderItem.UnitPrice.Amount);
 
         return Results.Ok(response);
     }

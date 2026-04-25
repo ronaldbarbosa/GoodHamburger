@@ -1,4 +1,4 @@
 namespace GoodHamburger.Web.Models;
 
-public record OrderResponse(int Id, List<OrderItemResponse> Items, string Subtotal, string Discount, string Total,
+public record OrderResponse(int Id, List<OrderItemResponse> Items, decimal Subtotal, decimal Discount, decimal Total,
     DateTime CreatedAt, string Status);
