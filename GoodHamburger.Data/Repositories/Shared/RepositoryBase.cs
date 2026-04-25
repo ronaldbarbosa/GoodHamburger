@@ -2,6 +2,7 @@ using GoodHamburger.Core.Entities.Shared;
 using GoodHamburger.Core.Exceptions;
 using GoodHamburger.Core.Interfaces.Repositories.Shared;
 using GoodHamburger.Data.Context;
+using GoodHamburger.Shared.Pagination;
 using Microsoft.EntityFrameworkCore;
 
 namespace GoodHamburger.Data.Repositories.Shared;
@@ -14,6 +15,17 @@ public abstract class RepositoryBase<TEntity>(DataContext context) : IRepository
         await Context.Set<TEntity>()
             .AsNoTracking()
             .ToListAsync(ct);
+
+    public virtual async Task<PaginatedList<TEntity>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken ct = default)
+    {
+        var source = Context.Set<TEntity>().AsNoTracking();
+        var totalCount = await source.CountAsync(ct);
+        var items = await source
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+        return new PaginatedList<TEntity>(items, totalCount, pageNumber, pageSize);
+    }
 
     public virtual async Task<TEntity?> GetByIdAsync(int id, CancellationToken ct = default) =>
         await Context.Set<TEntity>().FindAsync([id], ct);

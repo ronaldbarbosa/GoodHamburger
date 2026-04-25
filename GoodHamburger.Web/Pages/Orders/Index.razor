@@ -8,7 +8,13 @@
 <MudText Typo="Typo.h4" Class="mb-4">Pedidos</MudText>
 
 <MudPaper>
-    <MudTable T="OrderResponse" Items="orders" Hover="true" Striped="true" Dense="true">
+    <MudTable T="OrderResponse"
+              ServerData="LoadPageAsync"
+              @ref="_table"
+              Hover="true"
+              Striped="true"
+              Dense="true"
+              RowsPerPage="10">
         <HeaderContent>
             <MudTh>ID</MudTh>
             <MudTh>Data</MudTh>
@@ -87,21 +93,23 @@
         <LoadingContent>
             <MudText>Carregando...</MudText>
         </LoadingContent>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }" RowsPerPageString="Linhas por página:" />
+        </PagerContent>
     </MudTable>
 </MudPaper>
 
 @code {
-    private List<OrderResponse> orders = [];
+    private MudTable<OrderResponse> _table = null!;
 
-    protected override async Task OnInitializedAsync()
+    private async Task<TableData<OrderResponse>> LoadPageAsync(TableState state, CancellationToken ct)
     {
-        await LoadOrdersAsync();
-    }
-
-    private async Task LoadOrdersAsync()
-    {
-        var all = await OrderService.GetAllAsync();
-        orders = all.Where(o => o.Status != "Pending").ToList();
+        var paged = await OrderService.GetPagedAsync(state.Page + 1, state.PageSize);
+        return new TableData<OrderResponse>
+        {
+            Items = paged.Items,
+            TotalItems = paged.TotalItemCount
+        };
     }
 
     private Color GetStatusColor(string status) => status.ToLower() switch
@@ -154,14 +162,14 @@
     {
         await OrderService.CancelAsync(id);
         Snackbar.Add($"Pedido #{id:000000} cancelado.", Severity.Warning);
-        await LoadOrdersAsync();
+        await _table.ReloadServerData();
     }
 
     private async Task DeleteOrderAsync(int id)
     {
         await OrderService.DeleteAsync(id);
         Snackbar.Add($"Pedido #{id:000000} excluído.", Severity.Success);
-        await LoadOrdersAsync();
+        await _table.ReloadServerData();
     }
 
     private async Task OpenEditDialogAsync(OrderResponse order)
@@ -177,7 +185,7 @@
         if (result is { Canceled: false })
         {
             Snackbar.Add($"Pedido #{order.Id:000000} atualizado.", Severity.Success);
-            await LoadOrdersAsync();
+            await _table.ReloadServerData();
         }
     }
 
@@ -194,7 +202,7 @@
         if (result is { Canceled: false })
         {
             Snackbar.Add($"Status do pedido #{order.Id:000000} atualizado.", Severity.Success);
-            await LoadOrdersAsync();
+            await _table.ReloadServerData();
         }
     }
 }

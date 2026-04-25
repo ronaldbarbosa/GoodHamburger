@@ -1,29 +1,44 @@
 using GoodHamburger.Api.Models.Responses;
-using GoodHamburger.Core.Entities;
 using GoodHamburger.Core.Interfaces.Services;
+using GoodHamburger.Shared.Pagination;
 
 namespace GoodHamburger.Api.Endpoints.OrderItemEndpoints;
 
 public static class GetOrderItems
 {
-    public static async Task<IResult> Handle(IOrderItemService orderItemService, CancellationToken ct)
+    public static async Task<IResult> Handle(
+        IOrderItemService orderItemService,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken ct = default)
     {
         try
         {
-            var orderItems = await orderItemService.GetAllAsync(ct);
-            
-            var response = orderItems.Select(oi => new OrderItemResponse(
-                oi.Id,
-                new ProductResponse(
-                    oi.ProductId, 
-                    oi.Product!.Name,
-                    oi.Product.Price.ToString(),
-                    new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
-                    oi.Product!.ImageUrl),
-                oi.Quantity,
-                oi.UnitPrice.ToString()))
-                .ToList();
-            
+            if (pageNumber < 1 || pageSize < 1 || pageSize > 50)
+            {
+                var validation = new ValidationResponse([
+                    new ValidationItemResponse("paginação", "pageNumber deve ser >= 1 e pageSize entre 1 e 50.")
+                ]);
+                return Results.BadRequest(validation);
+            }
+
+            var paged = await orderItemService.GetPagedAsync(pageNumber, pageSize, ct);
+
+            var response = new PaginatedList<OrderItemResponse>(
+                paged.Items.Select(oi => new OrderItemResponse(
+                    oi.Id,
+                    new ProductResponse(
+                        oi.ProductId,
+                        oi.Product!.Name,
+                        oi.Product.Price.ToString(),
+                        new ProductCategoryResponse(oi.Product!.CategoryId, oi.Product!.Category!.Name),
+                        oi.Product!.ImageUrl),
+                    oi.Quantity,
+                    oi.UnitPrice.ToString())).ToList(),
+                paged.TotalItemCount,
+                paged.PageNumber,
+                paged.PageSize);
+
             return Results.Ok(response);
         }
         catch (Exception)

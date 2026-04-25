@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using GoodHamburger.Shared.Pagination;
 using GoodHamburger.Web.Models;
 
 namespace GoodHamburger.Web.Services;
@@ -17,8 +18,8 @@ public class CartService
 
     public async Task InitializeAsync(HttpClient client)
     {
-        var orders = await client.GetFromJsonAsync<List<OrderResponse>>("/api/orders");
-        var pendingOrder = orders?.FirstOrDefault(o => o.Status == "Pending");
+        var paged = await client.GetFromJsonAsync<PaginatedList<OrderResponse>>("/api/orders?pageNumber=1&pageSize=50");
+        var pendingOrder = paged?.Items.FirstOrDefault(o => o.Status == "Pending");
 
         if (pendingOrder is not null)
         {

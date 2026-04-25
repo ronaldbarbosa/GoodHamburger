@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore;
 
 namespace GoodHamburger.Shared.Pagination;
 
@@ -42,12 +41,5 @@ public class PaginatedList<T> where T : class
         {
             Items.Add(item);
         }
-    }
-
-    public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageIndex, int pageNumber)
-    {
-        var totalItemCount = await source.CountAsync();
-        var items = await source.Skip((pageIndex - 1) * pageNumber).Take(pageNumber).ToListAsync();
-        return new PaginatedList<T>(items, totalItemCount, pageIndex, pageNumber);
     }
 }

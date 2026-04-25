@@ -1,23 +1,40 @@
 using GoodHamburger.Api.Models.Responses;
 using GoodHamburger.Core.Interfaces.Services;
+using GoodHamburger.Shared.Pagination;
 
 namespace GoodHamburger.Api.Endpoints.ProductEndpoints;
 
 public static class GetProducts
 {
-    public static async Task<IResult> Handle(IProductService productService, CancellationToken ct)
+    public static async Task<IResult> Handle(
+        IProductService productService,
+        int pageNumber = 1,
+        int pageSize = 10,
+        CancellationToken ct = default)
     {
         try
         {
-            var products = await productService.GetAllAsync(ct);
-            
-            var response = products.Select(p => new ProductResponse(
-                p.Id,
-                p.Name,
-                p.Price.ToString(),
-                new ProductCategoryResponse(p.CategoryId, p.Category!.Name),
-                p.ImageUrl));
-            
+            if (pageNumber < 1 || pageSize < 1 || pageSize > 50)
+            {
+                var validation = new ValidationResponse([
+                    new ValidationItemResponse("paginação", "pageNumber deve ser >= 1 e pageSize entre 1 e 50.")
+                ]);
+                return Results.BadRequest(validation);
+            }
+
+            var paged = await productService.GetPagedAsync(pageNumber, pageSize, ct);
+
+            var response = new PaginatedList<ProductResponse>(
+                paged.Items.Select(p => new ProductResponse(
+                    p.Id,
+                    p.Name,
+                    p.Price.ToString(),
+                    new ProductCategoryResponse(p.CategoryId, p.Category!.Name),
+                    p.ImageUrl)).ToList(),
+                paged.TotalItemCount,
+                paged.PageNumber,
+                paged.PageSize);
+
             return Results.Ok(response);
         }
         catch (Exception)

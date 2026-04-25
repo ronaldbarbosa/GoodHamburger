@@ -2,6 +2,7 @@ using GoodHamburger.Core.Entities.Shared;
 using GoodHamburger.Core.Interfaces;
 using GoodHamburger.Core.Interfaces.Repositories.Shared;
 using GoodHamburger.Core.Interfaces.Services.Shared;
+using GoodHamburger.Shared.Pagination;
 
 namespace GoodHamburger.Core.Services.Shared;
 
@@ -12,6 +13,9 @@ public abstract class ServiceBase<TEntity>(
 {
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken ct = default) =>
         await repository.GetAllAsync(ct);
+
+    public virtual async Task<PaginatedList<TEntity>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken ct = default) =>
+        await repository.GetPagedAsync(pageNumber, pageSize, ct);
 
     public virtual async Task<TEntity?> GetByIdAsync(int id, CancellationToken ct = default) =>
         await repository.GetByIdAsync(id, ct);

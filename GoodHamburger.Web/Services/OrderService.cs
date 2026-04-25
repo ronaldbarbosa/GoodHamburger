@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using GoodHamburger.Shared.Pagination;
 using GoodHamburger.Web.Models;
 
 namespace GoodHamburger.Web.Services;
@@ -8,10 +9,11 @@ public class OrderService(HttpClient client)
     private readonly HttpClient _client = client;
     private const string OrdersPath = "/api/orders";
 
-    public async Task<List<OrderResponse>> GetAllAsync()
+    public async Task<PaginatedList<OrderResponse>> GetPagedAsync(int pageNumber, int pageSize)
     {
-        var response = await _client.GetFromJsonAsync<List<OrderResponse>>(OrdersPath);
-        return response ?? [];
+        var response = await _client.GetFromJsonAsync<PaginatedList<OrderResponse>>(
+            $"{OrdersPath}?pageNumber={pageNumber}&pageSize={pageSize}");
+        return response ?? new PaginatedList<OrderResponse>();
     }
 
     public async Task<OrderResponse?> GetByIdAsync(int id)
