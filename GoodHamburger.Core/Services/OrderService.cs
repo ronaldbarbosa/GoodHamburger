@@ -24,13 +24,13 @@ public class OrderService : ServiceBase<Order>, IOrderService
         _discountCalculatorService = discountCalculatorService;
     }
 
-    public override async Task<Order> CreateAsync(Order entity)
+    public override async Task<Order> CreateAsync(Order entity, CancellationToken ct = default)
     {
         var products = new List<Product>();
 
         foreach (var item in entity.Items)
         {
-            var product = await _productRepository.GetByIdAsync(item.ProductId);
+            var product = await _productRepository.GetByIdAsync(item.ProductId, ct);
             if (product == null)
                 throw new EntityNotFoundException("Produto", item.ProductId);
 
@@ -46,12 +46,12 @@ public class OrderService : ServiceBase<Order>, IOrderService
         ValidateProductQuantity(entity.Items);
         RecalculateTotals(entity);
 
-        return await base.CreateAsync(entity);
+        return await base.CreateAsync(entity, ct);
     }
 
-    public override async Task<Order> UpdateAsync(Order entity)
+    public override async Task<Order> UpdateAsync(Order entity, CancellationToken ct = default)
     {
-        var existing = await _orderOrderItemRepository.GetByIdAsync(entity.Id);
+        var existing = await _orderOrderItemRepository.GetByIdAsync(entity.Id, ct);
         if (existing == null)
             throw new EntityNotFoundException("Pedido", entity.Id);
 
@@ -59,7 +59,7 @@ public class OrderService : ServiceBase<Order>, IOrderService
 
         foreach (var item in entity.Items)
         {
-            var product = await _productRepository.GetByIdAsync(item.ProductId);
+            var product = await _productRepository.GetByIdAsync(item.ProductId, ct);
             if (product == null)
                 throw new EntityNotFoundException("Produto", item.ProductId);
 
@@ -76,17 +76,17 @@ public class OrderService : ServiceBase<Order>, IOrderService
         ValidateProductQuantity(entity.Items);
         RecalculateTotals(entity);
 
-        await base.UpdateAsync(entity);
+        await base.UpdateAsync(entity, ct);
         return entity;
     }
 
-    public override async Task DeleteAsync(int id)
+    public override async Task DeleteAsync(int id, CancellationToken ct = default)
     {
-        var entity = await _orderOrderItemRepository.GetByIdAsync(id);
+        var entity = await _orderOrderItemRepository.GetByIdAsync(id, ct);
         if (entity == null)
             throw new EntityNotFoundException("Pedido", id);
 
-        await base.DeleteAsync(id);
+        await base.DeleteAsync(id, ct);
     }
 
     public void ValidateDuplicateCategories(IEnumerable<Product> products)

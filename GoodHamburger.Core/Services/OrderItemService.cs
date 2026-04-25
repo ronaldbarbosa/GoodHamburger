@@ -27,14 +27,14 @@ public class OrderItemService : ServiceBase<OrderItem>, IOrderItemService
         _unitOfWork = unitOfWork;
     }
 
-    public override async Task<OrderItem> CreateAsync(OrderItem entity)
+    public override async Task<OrderItem> CreateAsync(OrderItem entity, CancellationToken ct = default)
     {
-        var order = await _orderService.GetByIdAsync(entity.OrderId);
+        var order = await _orderService.GetByIdAsync(entity.OrderId, ct);
 
         if (order == null)
             throw new EntityNotFoundException("Pedido", entity.OrderId);
 
-        var product = await _productRepository.GetByIdAsync(entity.ProductId);
+        var product = await _productRepository.GetByIdAsync(entity.ProductId, ct);
 
         if (product == null)
             throw new EntityNotFoundException("Produto", entity.ProductId);
@@ -50,30 +50,30 @@ public class OrderItemService : ServiceBase<OrderItem>, IOrderItemService
         _orderService.ValidateProductQuantity(order.Items);
         _orderService.RecalculateTotals(order);
 
-        await _unitOfWork.BeginTransactionAsync();
+        await _unitOfWork.BeginTransactionAsync(ct);
         try
         {
-            await _orderItemRepository.AddAsync(entity);
-            await _orderService.UpdateAsync(order);
-            await _unitOfWork.CommitAsync();
+            await _orderItemRepository.AddAsync(entity, ct);
+            await _orderService.UpdateAsync(order, ct);
+            await _unitOfWork.CommitAsync(ct);
         }
         catch
         {
-            await _unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync(ct);
             throw;
         }
 
         return entity;
     }
 
-    public override async Task UpdateAsync(OrderItem entity)
+    public override async Task UpdateAsync(OrderItem entity, CancellationToken ct = default)
     {
-        var order = await _orderService.GetByIdAsync(entity.OrderId);
+        var order = await _orderService.GetByIdAsync(entity.OrderId, ct);
 
         if (order == null)
             throw new EntityNotFoundException("Pedido", entity.OrderId);
 
-        var product = await _productRepository.GetByIdAsync(entity.ProductId);
+        var product = await _productRepository.GetByIdAsync(entity.ProductId, ct);
 
         if (product == null)
             throw new EntityNotFoundException("Produto", entity.ProductId);
@@ -90,44 +90,44 @@ public class OrderItemService : ServiceBase<OrderItem>, IOrderItemService
         _orderService.ValidateProductQuantity(order.Items);
         _orderService.RecalculateTotals(order);
 
-        await _unitOfWork.BeginTransactionAsync();
+        await _unitOfWork.BeginTransactionAsync(ct);
         try
         {
-            await _orderService.UpdateAsync(order);
-            await base.UpdateAsync(entity);
-            await _unitOfWork.CommitAsync();
+            await _orderService.UpdateAsync(order, ct);
+            await base.UpdateAsync(entity, ct);
+            await _unitOfWork.CommitAsync(ct);
         }
         catch
         {
-            await _unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync(ct);
             throw;
         }
     }
 
-    public override async Task DeleteAsync(int id)
+    public override async Task DeleteAsync(int id, CancellationToken ct = default)
     {
-        var orderItem = await _orderItemRepository.GetByIdAsync(id);
+        var orderItem = await _orderItemRepository.GetByIdAsync(id, ct);
 
         if (orderItem == null)
             throw new EntityNotFoundException("Item do Pedido", id);
 
-        await _unitOfWork.BeginTransactionAsync();
+        await _unitOfWork.BeginTransactionAsync(ct);
         try
         {
-            await base.DeleteAsync(id);
+            await base.DeleteAsync(id, ct);
 
-            var order = await _orderService.GetByIdAsync(orderItem.OrderId);
+            var order = await _orderService.GetByIdAsync(orderItem.OrderId, ct);
             if (order != null)
             {
                 _orderService.RecalculateTotals(order);
-                await _orderService.UpdateAsync(order);
+                await _orderService.UpdateAsync(order, ct);
             }
 
-            await _unitOfWork.CommitAsync();
+            await _unitOfWork.CommitAsync(ct);
         }
         catch
         {
-            await _unitOfWork.RollbackAsync();
+            await _unitOfWork.RollbackAsync(ct);
             throw;
         }
     }

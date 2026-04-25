@@ -2,8 +2,8 @@ namespace GoodHamburger.Core.Interfaces;
 
 public interface IUnitOfWork
 {
-    Task SaveChangesAsync();
-    Task BeginTransactionAsync();
-    Task CommitAsync();
-    Task RollbackAsync();
+    Task SaveChangesAsync(CancellationToken ct = default);
+    Task BeginTransactionAsync(CancellationToken ct = default);
+    Task CommitAsync(CancellationToken ct = default);
+    Task RollbackAsync(CancellationToken ct = default);
 }

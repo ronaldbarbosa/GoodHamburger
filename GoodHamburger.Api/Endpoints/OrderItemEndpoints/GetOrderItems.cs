@@ -6,11 +6,11 @@ namespace GoodHamburger.Api.Endpoints.OrderItemEndpoints;
 
 public static class GetOrderItems
 {
-    public static async Task<IResult> Handle(IOrderItemService orderItemService)
+    public static async Task<IResult> Handle(IOrderItemService orderItemService, CancellationToken ct)
     {
         try
         {
-            var orderItems = await orderItemService.GetAllAsync();
+            var orderItems = await orderItemService.GetAllAsync(ct);
             
             var response = orderItems.Select(oi => new OrderItemResponse(
                 oi.Id,

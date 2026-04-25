@@ -10,29 +10,29 @@ public abstract class RepositoryBase<TEntity>(DataContext context) : IRepository
 {
     protected readonly DataContext Context = context;
     
-    public virtual async Task<IEnumerable<TEntity>> GetAllAsync() =>
+    public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken ct = default) =>
         await Context.Set<TEntity>()
             .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync(ct);
 
-    public virtual async Task<TEntity?> GetByIdAsync(int id) =>
-        await Context.Set<TEntity>().FindAsync(id);
+    public virtual async Task<TEntity?> GetByIdAsync(int id, CancellationToken ct = default) =>
+        await Context.Set<TEntity>().FindAsync([id], ct);
 
-    public virtual async Task<TEntity> AddAsync(TEntity entity)
+    public virtual async Task<TEntity> AddAsync(TEntity entity, CancellationToken ct = default)
     {
-        await Context.Set<TEntity>().AddAsync(entity);
+        await Context.Set<TEntity>().AddAsync(entity, ct);
         return entity;
     }
 
-    public virtual Task UpdateAsync(TEntity entity)
+    public virtual Task UpdateAsync(TEntity entity, CancellationToken ct = default)
     {
         Context.Entry(entity).State = EntityState.Modified;
         return Task.CompletedTask;
     }
 
-    public virtual async Task DeleteAsync(int id)
+    public virtual async Task DeleteAsync(int id, CancellationToken ct = default)
     {
-        var entity = await GetByIdAsync(id);
+        var entity = await GetByIdAsync(id, ct);
 
         if (entity == null)
             throw new EntityNotFoundException(nameof(TEntity), id);

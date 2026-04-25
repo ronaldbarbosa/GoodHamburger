@@ -18,26 +18,26 @@ public class ProductCategoryService : ServiceBase<ProductCategory>, IProductCate
         _orderItemRepository = orderItemRepository;
     }
 
-    public override async Task<ProductCategory> UpdateAsync(ProductCategory entity)
+    public override async Task<ProductCategory> UpdateAsync(ProductCategory entity, CancellationToken ct = default)
     {
-        var existing = await _orderItemRepository.GetByIdAsync(entity.Id);
+        var existing = await _orderItemRepository.GetByIdAsync(entity.Id, ct);
         if (existing == null)
             throw new EntityNotFoundException("Categoria", entity.Id);
 
         entity.Products = existing.Products;
-        await base.UpdateAsync(entity);
+        await base.UpdateAsync(entity, ct);
         return entity;
     }
 
-    public override async Task DeleteAsync(int id)
+    public override async Task DeleteAsync(int id, CancellationToken ct = default)
     {
-        var entity = await _orderItemRepository.GetByIdAsync(id);
+        var entity = await _orderItemRepository.GetByIdAsync(id, ct);
         if (entity == null)
             throw new EntityNotFoundException("Categoria", id);
 
         if (entity.Products.Any())
             throw new BusinessRuleViolationException($"Categoria '{entity.Name}' possui produtos vinculados.");
 
-        await base.DeleteAsync(id);
+        await base.DeleteAsync(id, ct);
     }
 }

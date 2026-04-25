@@ -10,28 +10,28 @@ public abstract class ServiceBase<TEntity>(
     IUnitOfWork unitOfWork) : IServiceBase<TEntity>
     where TEntity : Entity
 {
-    public virtual async Task<IEnumerable<TEntity>> GetAllAsync() =>
-        await repository.GetAllAsync();
+    public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken ct = default) =>
+        await repository.GetAllAsync(ct);
 
-    public virtual async Task<TEntity?> GetByIdAsync(int id) =>
-        await repository.GetByIdAsync(id);
+    public virtual async Task<TEntity?> GetByIdAsync(int id, CancellationToken ct = default) =>
+        await repository.GetByIdAsync(id, ct);
 
-    public virtual async Task<TEntity> CreateAsync(TEntity entity)
+    public virtual async Task<TEntity> CreateAsync(TEntity entity, CancellationToken ct = default)
     {
-        var result = await repository.AddAsync(entity);
-        await unitOfWork.SaveChangesAsync();
+        var result = await repository.AddAsync(entity, ct);
+        await unitOfWork.SaveChangesAsync(ct);
         return result;
     }
 
-    public virtual async Task UpdateAsync(TEntity entity)
+    public virtual async Task UpdateAsync(TEntity entity, CancellationToken ct = default)
     {
-        await repository.UpdateAsync(entity);
-        await unitOfWork.SaveChangesAsync();
+        await repository.UpdateAsync(entity, ct);
+        await unitOfWork.SaveChangesAsync(ct);
     }
 
-    public virtual async Task DeleteAsync(int id)
+    public virtual async Task DeleteAsync(int id, CancellationToken ct = default)
     {
-        await repository.DeleteAsync(id);
-        await unitOfWork.SaveChangesAsync();
+        await repository.DeleteAsync(id, ct);
+        await unitOfWork.SaveChangesAsync(ct);
     }
 }

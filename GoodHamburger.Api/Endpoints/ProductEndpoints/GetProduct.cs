@@ -7,11 +7,12 @@ public static class GetProduct
 {
     public static async Task<IResult> Handle(
         IProductService productService,
-        int id)
+        int id,
+        CancellationToken ct)
     {
         try
         {
-            var product = await productService.GetByIdAsync(id);
+            var product = await productService.GetByIdAsync(id, ct);
             
             if (product is null)
             {

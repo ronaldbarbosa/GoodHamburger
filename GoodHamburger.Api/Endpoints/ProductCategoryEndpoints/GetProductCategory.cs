@@ -7,11 +7,12 @@ public static class GetProductCategory
 {
     public static async Task<IResult> Handle(
         IProductCategoryService productCategoryService,
-        int id)
+        int id,
+        CancellationToken ct)
     {
         try
         {
-            var category = await productCategoryService.GetByIdAsync(id);
+            var category = await productCategoryService.GetByIdAsync(id, ct);
             
             if (category is null)
             {

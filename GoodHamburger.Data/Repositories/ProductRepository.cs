@@ -8,18 +8,18 @@ namespace GoodHamburger.Data.Repositories;
 
 public class ProductRepository(DataContext context) : RepositoryBase<Product>(context), IProductRepository  
 {
-    public override async Task<Product?> GetByIdAsync(int id)
+    public override async Task<Product?> GetByIdAsync(int id, CancellationToken ct = default)
     {
         return await Context.Products
             .Include(p => p.Category)
-            .SingleOrDefaultAsync(o => o.Id == id);
+            .SingleOrDefaultAsync(o => o.Id == id, ct);
     }
 
-    public override async Task<IEnumerable<Product>> GetAllAsync()
+    public override async Task<IEnumerable<Product>> GetAllAsync(CancellationToken ct = default)
     {
-        return await  Context.Products
+        return await Context.Products
             .AsNoTracking()
             .Include(p => p.Category)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 }

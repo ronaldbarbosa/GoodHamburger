@@ -13,7 +13,8 @@ public static class UpdateOrderStatus
     public static async Task<IResult> Handle(
         IOrderService orderService,
         int id,
-        UpdateOrderStatusRequest request)
+        UpdateOrderStatusRequest request,
+        CancellationToken ct)
     {
         try
         {
@@ -23,7 +24,7 @@ public static class UpdateOrderStatus
                 return Results.BadRequest(invalid);
             }
 
-            var order = await orderService.GetByIdAsync(id);
+            var order = await orderService.GetByIdAsync(id, ct);
 
             if (order is null)
             {
@@ -50,7 +51,7 @@ public static class UpdateOrderStatus
             }
 
             order.Status = newStatus;
-            await orderService.UpdateAsync(order);
+            await orderService.UpdateAsync(order, ct);
 
             var response = new OrderResponse(
                 order.Id,

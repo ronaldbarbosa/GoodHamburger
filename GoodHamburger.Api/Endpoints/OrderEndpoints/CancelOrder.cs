@@ -9,11 +9,12 @@ public static class CancelOrder
 {
     public static async Task<IResult> Handle(
         IOrderService orderService,
-        int id)
+        int id,
+        CancellationToken ct)
     {
         try
         {
-            var order = await orderService.GetByIdAsync(id);
+            var order = await orderService.GetByIdAsync(id, ct);
 
             if (order is null)
             {
@@ -28,7 +29,7 @@ public static class CancelOrder
             }
 
             order.Status = OrderStatus.Cancelled;
-            await orderService.UpdateAsync(order);
+            await orderService.UpdateAsync(order, ct);
 
             var response = new OrderResponse(
                 order.Id,

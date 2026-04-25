@@ -10,7 +10,8 @@ public static class PostOrderItem
 {
     public static async Task<IResult> Handle(
         IOrderItemService orderItemService,
-        CreateOrderItemRequest  request)
+        CreateOrderItemRequest request,
+        CancellationToken ct)
     {
         try
         {
@@ -20,8 +21,8 @@ public static class PostOrderItem
                 ProductId = request.ProductId,
                 Quantity = request.Quantity
             };
-            
-            var orderItemResult = await orderItemService.CreateAsync(orderItem);
+
+            var orderItemResult = await orderItemService.CreateAsync(orderItem, ct);
             
             var response = new OrderItemResponse(
                 orderItemResult.Id,

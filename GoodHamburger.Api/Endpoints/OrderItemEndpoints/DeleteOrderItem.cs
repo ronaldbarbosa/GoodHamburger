@@ -7,11 +7,12 @@ public static class DeleteOrderItem
 {
     public static async Task<IResult> Handle(
         IOrderItemService orderItemService,
-        int id)
+        int id,
+        CancellationToken ct)
     {
         try
         {
-            var existingOrderItem = await orderItemService.GetByIdAsync(id);
+            var existingOrderItem = await orderItemService.GetByIdAsync(id, ct);
             
             if (existingOrderItem is null)
             {
@@ -19,7 +20,7 @@ public static class DeleteOrderItem
                 return Results.NotFound(validation);
             }
             
-            await orderItemService.DeleteAsync(id);
+            await orderItemService.DeleteAsync(id, ct);
             
             return Results.NoContent();
         }

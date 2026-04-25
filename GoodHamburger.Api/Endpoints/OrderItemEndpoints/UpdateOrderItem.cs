@@ -11,11 +11,12 @@ public static class UpdateOrderItem
     public static async Task<IResult> Handle(
         IOrderItemService orderItemService,
         int id,
-        UpdateOrderItemRequest request)
+        UpdateOrderItemRequest request,
+        CancellationToken ct)
     {
         try
         {
-            var existingOrderItem = await orderItemService.GetByIdAsync(id);
+            var existingOrderItem = await orderItemService.GetByIdAsync(id, ct);
             
             if (existingOrderItem is null)
             {
@@ -26,7 +27,7 @@ public static class UpdateOrderItem
             existingOrderItem.Quantity = request.Quantity;
             existingOrderItem.ProductId = request.ProductId;
             
-            await orderItemService.UpdateAsync(existingOrderItem);
+            await orderItemService.UpdateAsync(existingOrderItem, ct);
             
             var response = new OrderItemResponse(
                 existingOrderItem.Id,

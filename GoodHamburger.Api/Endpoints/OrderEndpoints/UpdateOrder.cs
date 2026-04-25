@@ -11,11 +11,12 @@ public static class UpdateOrder
     public static async Task<IResult> Handle(
         IOrderService orderService,
         int id,
-        UpdateOrderRequest request)
+        UpdateOrderRequest request,
+        CancellationToken ct)
     {
         try
         {
-            var existingOrder = await orderService.GetByIdAsync(id);
+            var existingOrder = await orderService.GetByIdAsync(id, ct);
 
             if (existingOrder is null)
             {
@@ -32,7 +33,7 @@ public static class UpdateOrder
                 }).ToList();
             }
 
-            await orderService.UpdateAsync(existingOrder);
+            await orderService.UpdateAsync(existingOrder, ct);
 
             var response = new OrderResponse(
                 existingOrder.Id,

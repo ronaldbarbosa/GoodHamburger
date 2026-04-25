@@ -9,11 +9,12 @@ public static class GetOrderItem
 {
     public static async Task<IResult> Handle(
         IOrderItemService orderItemService,
-        int id)
+        int id,
+        CancellationToken ct)
     {
         try
         {
-            var orderItem = await orderItemService.GetByIdAsync(id);
+            var orderItem = await orderItemService.GetByIdAsync(id, ct);
             
             if (orderItem is null)
             {

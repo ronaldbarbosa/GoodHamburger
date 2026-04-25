@@ -8,11 +8,12 @@ public static class DeleteOrder
 {
     public static async Task<IResult> Handle(
         IOrderService orderService,
-        int id)
+        int id,
+        CancellationToken ct)
     {
         try
         {
-            var existingOrder = await orderService.GetByIdAsync(id);
+            var existingOrder = await orderService.GetByIdAsync(id, ct);
 
             if (existingOrder is null)
             {
@@ -26,7 +27,7 @@ public static class DeleteOrder
                 return Results.BadRequest(validation);
             }
 
-            await orderService.DeleteAsync(id);
+            await orderService.DeleteAsync(id, ct);
 
             return Results.NoContent();
         }

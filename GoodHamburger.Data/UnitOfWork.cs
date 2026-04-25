@@ -8,22 +8,23 @@ public class UnitOfWork(DataContext context) : IUnitOfWork
 {
     private IDbContextTransaction? _transaction;
 
-    public async Task SaveChangesAsync() => await context.SaveChangesAsync();
+    public async Task SaveChangesAsync(CancellationToken ct = default) =>
+        await context.SaveChangesAsync(ct);
 
-    public async Task BeginTransactionAsync()
+    public async Task BeginTransactionAsync(CancellationToken ct = default)
     {
-        _transaction = await context.Database.BeginTransactionAsync();
+        _transaction = await context.Database.BeginTransactionAsync(ct);
     }
 
-    public async Task CommitAsync()
+    public async Task CommitAsync(CancellationToken ct = default)
     {
         if (_transaction is not null)
-            await _transaction.CommitAsync();
+            await _transaction.CommitAsync(ct);
     }
 
-    public async Task RollbackAsync()
+    public async Task RollbackAsync(CancellationToken ct = default)
     {
         if (_transaction is not null)
-            await _transaction.RollbackAsync();
+            await _transaction.RollbackAsync(ct);
     }
 }

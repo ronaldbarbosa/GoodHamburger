@@ -5,11 +5,11 @@ namespace GoodHamburger.Api.Endpoints.ProductEndpoints;
 
 public static class GetProducts
 {
-    public static async Task<IResult> Handle(IProductService productService)
+    public static async Task<IResult> Handle(IProductService productService, CancellationToken ct)
     {
         try
         {
-            var products = await productService.GetAllAsync();
+            var products = await productService.GetAllAsync(ct);
             
             var response = products.Select(p => new ProductResponse(
                 p.Id,
