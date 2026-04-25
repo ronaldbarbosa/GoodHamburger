@@ -1,6 +1,6 @@
 using GoodHamburger.Api.Models.Responses;
 using GoodHamburger.Core.Interfaces.Services;
-using GoodHamburger.Shared.Pagination;
+using GoodHamburger.Core.Common;
 
 namespace GoodHamburger.Api.Endpoints.OrderItemEndpoints;
 

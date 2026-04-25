@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace GoodHamburger.Shared.Pagination;
+namespace GoodHamburger.Core.Common;
 
 [Serializable]
 public class PaginatedList<T> where T : class
@@ -26,9 +26,7 @@ public class PaginatedList<T> where T : class
     [JsonPropertyName("hasNextPage")]
     public bool HasNextPage => PageNumber < TotalPages;
 
-    public PaginatedList()
-    {
-    }
+    public PaginatedList() { }
 
     public PaginatedList(List<T> items, int totalItemCount, int pageNumber, int pageSize)
     {
@@ -36,10 +34,7 @@ public class PaginatedList<T> where T : class
         PageNumber = pageNumber;
         PageSize = pageSize;
         TotalPages = (int)Math.Ceiling(totalItemCount / (double)pageSize);
-
         foreach (var item in items)
-        {
             Items.Add(item);
-        }
     }
 }

@@ -6,9 +6,6 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-<ItemGroup>
-      <ProjectReference Include="..\GoodHamburger.Shared.Pagination\GoodHamburger.Shared.Pagination.csproj" />
-    </ItemGroup>
 
 <ItemGroup>
       <Folder Include="ValueObjects\" />

@@ -1,5 +1,5 @@
 using System.Net.Http.Json;
-using GoodHamburger.Shared.Pagination;
+using GoodHamburger.Core.Common;
 using GoodHamburger.Web.Models;
 
 namespace GoodHamburger.Web.Services;

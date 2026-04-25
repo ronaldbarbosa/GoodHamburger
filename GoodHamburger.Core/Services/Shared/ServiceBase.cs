@@ -2,7 +2,7 @@ using GoodHamburger.Core.Entities.Shared;
 using GoodHamburger.Core.Interfaces;
 using GoodHamburger.Core.Interfaces.Repositories.Shared;
 using GoodHamburger.Core.Interfaces.Services.Shared;
-using GoodHamburger.Shared.Pagination;
+using GoodHamburger.Core.Common;
 
 namespace GoodHamburger.Core.Services.Shared;
 

@@ -2,7 +2,7 @@ using GoodHamburger.Core.Entities;
 using GoodHamburger.Core.Interfaces.Repositories;
 using GoodHamburger.Data.Context;
 using GoodHamburger.Data.Repositories.Shared;
-using GoodHamburger.Shared.Pagination;
+using GoodHamburger.Core.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace GoodHamburger.Data.Repositories;

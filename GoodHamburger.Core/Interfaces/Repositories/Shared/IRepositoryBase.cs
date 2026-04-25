@@ -1,5 +1,5 @@
 using GoodHamburger.Core.Entities.Shared;
-using GoodHamburger.Shared.Pagination;
+using GoodHamburger.Core.Common;
 
 namespace GoodHamburger.Core.Interfaces.Repositories.Shared;
 
