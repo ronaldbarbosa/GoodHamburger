@@ -16,6 +16,7 @@
               Dense="true"
               RowsPerPage="10">
         <HeaderContent>
+            <MudTh Style="width: 40px;" />
             <MudTh>ID</MudTh>
             <MudTh>Data</MudTh>
             <MudTh>Subtotal</MudTh>
@@ -25,6 +26,11 @@
             <MudTh Style="width: 120px;">Ações</MudTh>
         </HeaderContent>
         <RowTemplate>
+            <MudTd>
+                <MudIconButton Icon="@(_expandedRows.Contains(context.Id) ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)"
+                               Size="Size.Small"
+                               OnClick="() => ToggleRow(context.Id)" />
+            </MudTd>
             <MudTd>
                 <MudText Style="@(context.Status == "Cancelled" ? "opacity: 0.5;" : "")">
                     #@context.Id.ToString("000000")
@@ -87,6 +93,23 @@
                 }
             </MudTd>
         </RowTemplate>
+        <ChildRowContent>
+            <MudTr>
+                <MudTd colspan="8" Style="padding: 0;">
+                    <MudCollapse Expanded="_expandedRows.Contains(context.Id)">
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px;">
+                            @foreach (var item in context.Items)
+                            {
+                                <MudChip T="string" Variant="Variant.Outlined" Size="Size.Small">
+                                    @item.Product.Name
+                                    <span style="opacity: 0.6; margin-left: 6px;">R$ @item.UnitPrice</span>
+                                </MudChip>
+                            }
+                        </div>
+                    </MudCollapse>
+                </MudTd>
+            </MudTr>
+        </ChildRowContent>
         <NoRecordsContent>
             <MudText>Nenhum pedido encontrado.</MudText>
         </NoRecordsContent>
@@ -101,6 +124,13 @@
 
 @code {
     private MudTable<OrderResponse> _table = null!;
+    private readonly HashSet<int> _expandedRows = [];
+
+    private void ToggleRow(int orderId)
+    {
+        if (!_expandedRows.Add(orderId))
+            _expandedRows.Remove(orderId);
+    }
 
     private async Task<TableData<OrderResponse>> LoadPageAsync(TableState state, CancellationToken ct)
     {

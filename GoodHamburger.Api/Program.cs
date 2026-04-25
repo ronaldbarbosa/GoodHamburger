@@ -29,7 +29,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowBlazor");
 app.UseGlobalExceptionHandler();
-app.UseHttpsRedirection();
 
 app
     .MapOrderItemEndpoints()
