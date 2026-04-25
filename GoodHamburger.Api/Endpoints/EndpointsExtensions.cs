@@ -23,28 +23,6 @@ public static class EndpointsExtensions
             .Produces<ValidationResponse>(StatusCodes.Status400BadRequest)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
-        group.MapGet("", GetOrderItems.Handle)
-            .WithDisplayName("ListarItensPedido")
-            .WithDescription("Listar todos os itens de pedido")
-            .Produces<IEnumerable<OrderItemResponse>>()
-            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
-
-        group.MapGet("/{id}", GetOrderItem.Handle)
-            .WithDisplayName("ObterItemPedido")
-            .WithDescription("Obter um item de pedido pelo id")
-            .Produces<OrderItemResponse>()
-            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
-            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
-
-        group.MapPut("/{id}", UpdateOrderItem.Handle)
-            .AddEndpointFilter<ValidationEndpointFilter<UpdateOrderItemRequest>>()
-            .WithDisplayName("AtualizarItemPedido")
-            .WithDescription("Atualizar um item de pedido")
-            .Produces<OrderItemResponse>()
-            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
-            .Produces<ValidationResponse>(StatusCodes.Status400BadRequest)
-            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
-
         group.MapDelete("/{id}", DeleteOrderItem.Handle)
             .WithDisplayName("ExcluirItemPedido")
             .WithDescription("Excluir um item de pedido")
@@ -78,6 +56,13 @@ public static class EndpointsExtensions
             .WithDisplayName("ObterPedido")
             .WithDescription("Obter um pedido pelo id")
             .Produces<OrderResponse>()
+            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
+            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
+
+        group.MapGet("/{orderId}/items", GetOrderItems.Handle)
+            .WithDisplayName("ListarItensDoPedido")
+            .WithDescription("Listar os itens de um pedido")
+            .Produces<IEnumerable<OrderItemResponse>>()
             .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
@@ -136,13 +121,6 @@ public static class EndpointsExtensions
             .Produces<IEnumerable<ProductCategoryResponse>>()
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
-        group.MapGet("/{id}", GetProductCategory.Handle)
-            .WithDisplayName("ObterCategoria")
-            .WithDescription("Obter uma categoria pelo id")
-            .Produces<ProductCategoryResponse>()
-            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
-            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
-
         return app;
     }
 
@@ -155,13 +133,6 @@ public static class EndpointsExtensions
             .WithDisplayName("ListarProdutos")
             .WithDescription("Listar todos os produtos")
             .Produces<IEnumerable<ProductResponse>>()
-            .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
-
-        group.MapGet("/{id}", GetProduct.Handle)
-            .WithDisplayName("ObterProduto")
-            .WithDescription("Obter um produto pelo id")
-            .Produces<ProductResponse>()
-            .Produces<ValidationResponse>(StatusCodes.Status404NotFound)
             .Produces<ErrorResponse>(StatusCodes.Status500InternalServerError);
 
         return app;

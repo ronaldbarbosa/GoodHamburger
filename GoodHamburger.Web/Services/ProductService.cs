@@ -9,7 +9,7 @@ public class ProductService(HttpClient client)
     private readonly HttpClient _client = client;
     private const string ProductsPath = "/api/products";
 
-    public async Task<PaginatedList<ProductResponse>> GetPagedAsync(int pageNumber, int pageSize)
+    private async Task<PaginatedList<ProductResponse>> GetPagedAsync(int pageNumber, int pageSize)
     {
         var response = await _client.GetFromJsonAsync<PaginatedList<ProductResponse>>(
             $"{ProductsPath}?pageNumber={pageNumber}&pageSize={pageSize}");
@@ -44,17 +44,5 @@ public class ProductCategoryService(HttpClient client)
     {
         var response = await _client.GetFromJsonAsync<List<ProductCategoryResponse>>(CategoriesPath);
         return response ?? [];
-    }
-
-    public async Task<ProductCategoryResponse?> GetByIdAsync(int id)
-    {
-        try
-        {
-            return await _client.GetFromJsonAsync<ProductCategoryResponse>($"{CategoriesPath}/{id}");
-        }
-        catch
-        {
-            return null;
-        }
     }
 }

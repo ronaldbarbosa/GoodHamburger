@@ -1,18 +1,17 @@
-@page "/order-items"
+@page "/orders/{OrderId:int}/items"
 @inject OrderItemService OrderItemService
 
 <PageTitle>Itens do Pedido</PageTitle>
 
-<MudText Typo="Typo.h4" Class="mb-4">Itens do Pedido</MudText>
+<MudText Typo="Typo.h4" Class="mb-4">Itens do Pedido #@OrderId.ToString("000000")</MudText>
 
 <MudPaper>
     <MudTable T="OrderItemResponse"
-              ServerData="LoadPageAsync"
-              @ref="_table"
+              Items="_items"
               Hover="true"
               Striped="true"
               Dense="true"
-              RowsPerPage="10">
+              Loading="_loading">
         <HeaderContent>
             <MudTh>ID</MudTh>
             <MudTh>Produto</MudTh>
@@ -25,7 +24,7 @@
             <MudTd>@context.Product.Name</MudTd>
             <MudTd>@context.Product.Category.Name</MudTd>
             <MudTd>@context.Quantity</MudTd>
-            <MudTd>@context.UnitPrice</MudTd>
+            <MudTd>R$ @context.UnitPrice</MudTd>
         </RowTemplate>
         <NoRecordsContent>
             <MudText>Nenhum item encontrado.</MudText>
@@ -33,22 +32,18 @@
         <LoadingContent>
             <MudText>Carregando...</MudText>
         </LoadingContent>
-        <PagerContent>
-            <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }" RowsPerPageString="Linhas por página:" />
-        </PagerContent>
     </MudTable>
 </MudPaper>
 
 @code {
-    private MudTable<OrderItemResponse> _table = null!;
+    [Parameter] public int OrderId { get; set; }
 
-    private async Task<TableData<OrderItemResponse>> LoadPageAsync(TableState state, CancellationToken ct)
+    private List<OrderItemResponse> _items = [];
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
     {
-        var paged = await OrderItemService.GetPagedAsync(state.Page + 1, state.PageSize);
-        return new TableData<OrderItemResponse>
-        {
-            Items = paged.Items,
-            TotalItems = paged.TotalItemCount
-        };
+        _items = await OrderItemService.GetByOrderAsync(OrderId);
+        _loading = false;
     }
 }

@@ -16,24 +16,6 @@ public class OrderService(HttpClient client)
         return response ?? new PaginatedList<OrderResponse>();
     }
 
-    public async Task<OrderResponse?> GetByIdAsync(int id)
-    {
-        try
-        {
-            return await _client.GetFromJsonAsync<OrderResponse>($"{OrdersPath}/{id}");
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    public async Task<OrderResponse?> CreateAsync(CreateOrderRequest request)
-    {
-        var response = await _client.PostAsJsonAsync(OrdersPath, request);
-        return await response.Content.ReadFromJsonAsync<OrderResponse>();
-    }
-
     public async Task<OrderResponse?> UpdateAsync(int id, UpdateOrderRequest request)
     {
         var response = await _client.PutAsJsonAsync($"{OrdersPath}/{id}", request);

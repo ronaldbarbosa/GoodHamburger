@@ -26,8 +26,9 @@ Sistema de pedidos de uma hamburgueria, desenvolvido como desafio técnico. Perm
 | Frontend | Blazor WebAssembly 10 + MudBlazor 9 |
 | ORM | Entity Framework Core 10 |
 | Banco de dados | SQL Server |
+| Validação | FluentValidation 12 |
 | Documentação | Scalar (OpenAPI) |
-| Testes | xUnit + Moq | 
+| Testes | xUnit + Moq |
 
 ---
 
@@ -35,66 +36,63 @@ Sistema de pedidos de uma hamburgueria, desenvolvido como desafio técnico. Perm
 
 ### Clean Architecture em camadas
 
-O projeto está dividido em quatro camadas com dependências unidirecionais:
-
 ```
 Web (Blazor) ──► Api ──► Core ◄── Data
 ```
 
-- **Core** — entidades de domínio, regras de negócio, interfaces e exceções. Não depende de nenhuma camada externa.
-- **Data** — implementações de repositório, DbContext (EF Core), Unit of Work e migrations. Depende somente do Core.
-- **Api** — endpoints Minimal API, DTOs de request/response, injeção de dependências e tratamento global de exceções. Depende do Core e Data.
-- **Web** — aplicação Blazor WebAssembly que consome a API via HTTP. Depende somente dos contratos da Api.
+- **Core** — entidades, regras de negócio, interfaces e exceções. Sem dependências externas.
+- **Data** — repositórios, DbContext, Unit of Work e migrations.
+- **Api** — endpoints Minimal API, DTOs, validação de entrada e middleware de exceções.
+- **Web** — Blazor WebAssembly que consome a API via HTTP.
 
 ### Minimal API
 
-Os endpoints são organizados em classes estáticas com método `Handle`, mantendo a responsabilidade de cada operação isolada e testável sem necessidade de instanciar um controller.
+Endpoints organizados em classes estáticas com método `Handle`, mantendo cada operação isolada:
 
 ```
 Api/Endpoints/
-  OrderEndpoints/
-    GetOrders.cs   GetOrder.cs   PostOrder.cs   UpdateOrder.cs
-    DeleteOrder.cs CancelOrder.cs ConfirmOrder.cs UpdateOrderStatus.cs
-  OrderItemEndpoints/ ...
-  ProductEndpoints/ ...
+  OrderEndpoints/      GetOrders  GetOrder  PostOrder  UpdateOrder
+                       DeleteOrder  CancelOrder  ConfirmOrder  UpdateOrderStatus
+  OrderItemEndpoints/  GetOrderItems  GetOrderItem  PostOrderItem  UpdateOrderItem  DeleteOrderItem
+  ProductEndpoints/    GetProducts  GetProduct
 ```
 
 ### Repository + Unit of Work
 
-O acesso a dados é abstraído pelo padrão Repository, permitindo substituição da implementação sem afetar a camada de negócio. O `UnitOfWork` garante atomicidade em operações que envolvem múltiplas escritas (ex.: adicionar item e recalcular totais do pedido).
+Acesso a dados abstraído pelo padrão Repository. O `UnitOfWork` garante atomicidade em operações com múltiplas escritas — por exemplo, adicionar um item e recalcular os totais do pedido numa única transação.
 
-### Exceções de domínio tipadas
+### Validação com FluentValidation
 
-Erros de regra de negócio são expressos via exceções específicas, capturadas pelo middleware global e mapeadas para respostas HTTP padronizadas:
+Requisições de entrada são validadas via `ValidationEndpointFilter<T>`, um `IEndpointFilter` genérico aplicado aos endpoints de escrita. Os validadores ficam em `Api/Validators/` e retornam `400 Bad Request` com detalhes dos erros antes de o handler ser executado.
 
-| Exceção | Situação |
-|---------|----------|
-| `DuplicateItemException` | Produto da mesma categoria já está no pedido |
-| `InvalidItemQuantityException` | Quantidade diferente de 1 |
-| `EntityNotFoundException` | Entidade não encontrada por ID |
-| `BusinessRuleViolationException` | Demais violações de regra |
+### Tratamento centralizado de exceções
+
+O `ExceptionHandlerMiddleware` intercepta exceções de domínio e as mapeia para respostas HTTP padronizadas — eliminando try/catch dos handlers:
+
+| Exceção | HTTP |
+|---------|------|
+| `EntityNotFoundException` | 404 |
+| `DuplicateItemException` | 400 |
+| `BusinessRuleViolationException` | 400 |
+| `InvalidItemQuantityException` | 400 |
+| `JsonException` / `BadHttpRequestException` | 400 |
 
 ### Progressão de status
 
-O status do pedido segue uma máquina de estados linear com transições apenas para frente:
-
 ```
 Pending → Confirmed → Preparing → Ready → Completed
-                                         ↗
-                   (qualquer estado não-terminal) → Cancelled
+                (qualquer estado não-terminal) → Cancelled
 ```
 
-Pedidos `Completed` ou `Cancelled` são terminais — nenhuma alteração é permitida. A exclusão física só é permitida para pedidos `Cancelled`.
+Pedidos `Completed` ou `Cancelled` são terminais. Exclusão física só é permitida para pedidos `Cancelled`.
 
 ### Desconto calculado no servidor
 
-O cálculo de desconto reside no `DiscountCalculatorService` (Core), garantindo que a lógica não seja bypassável pelo cliente. O total é recalculado sempre que itens são adicionados, removidos ou atualizados.
+O `DiscountCalculatorService` (Core) garante que a lógica de desconto não seja bypassável pelo cliente. O total é recalculado sempre que itens são adicionados, removidos ou atualizados.
 
 ### Blazor — carrinho no lado do cliente
 
-O `CartService` mantém o estado do carrinho em memória durante a sessão. Ao inicializar, busca pedidos com status `Pending` e os reidrata localmente. Adições são sincronizadas com a API em tempo real.
-
-A regra de uma categoria por pedido é aplicada tanto no servidor (lança `DuplicateItemException`) quanto no cliente (o `CartService` bloqueia antes de fazer a requisição), proporcionando feedback instantâneo ao usuário.
+O `CartService` mantém o estado do carrinho em memória. Ao inicializar, busca pedidos com status `Pending` e os reidrata localmente. A regra de uma categoria por pedido é validada no servidor (`DuplicateItemException`) e também no cliente, antes de fazer a requisição.
 
 ---
 
@@ -102,36 +100,32 @@ A regra de uma categoria por pedido é aplicada tanto no servidor (lança `Dupli
 
 ### Descontos automáticos
 
-| Combinação de categorias | Desconto |
-|--------------------------|----------|
+| Combinação | Desconto |
+|------------|----------|
 | Sanduíche + Acompanhamento + Bebida | 20% |
 | Sanduíche + Bebida | 15% |
 | Sanduíche + Acompanhamento | 10% |
-| Qualquer outra combinação | 0% |
-
-O desconto é calculado sobre o subtotal do pedido.
+| Qualquer outra | 0% |
 
 ### Restrições de pedido
 
-- Cada pedido pode conter no máximo **um produto por categoria**.
-- A quantidade de cada item é sempre **exatamente 1**.
+- Máximo de **um produto por categoria** por pedido.
+- Quantidade de cada item sempre **exatamente 1**.
 - Somente produtos **ativos** podem ser adicionados.
-- O preço unitário é capturado no momento da adição e não muda com alterações futuras no produto.
+- Preço unitário capturado no momento da adição — imune a alterações futuras no produto.
 
 ---
 
 ## Pré-requisitos
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- SQL Server acessível em `localhost,1433`
-    - Usuário: `sa`
-    - Senha: configurada em `appsettings.Development.json`
+- SQL Server em `localhost,1433` (usuário `sa`, senha configurada no `appsettings.Development.json`)
 
 ---
 
 ## Configuração
 
-Edite `GoodHamburger.Api/appsettings.Development.json` com a string de conexão do seu ambiente:
+Edite `GoodHamburger.Api/appsettings.Development.json`:
 
 ```json
 {
@@ -145,40 +139,22 @@ Edite `GoodHamburger.Api/appsettings.Development.json` com a string de conexão 
 
 ## Como Executar
 
-### 1. Banco de dados
-
-Execute para a instalação dos pacotes necessários:
 ```bash
 dotnet restore
-```
-
-
-Aplique as migrations para criar o schema e popular os dados iniciais (categorias e produtos):
-
-```bash
 dotnet ef database update --project GoodHamburger.Data --startup-project GoodHamburger.Api
 ```
 
-### 2. API
-
+**API** (terminal 1):
 ```bash
-cd GoodHamburger.Api
-dotnet run
+cd GoodHamburger.Api && dotnet run
 ```
+Disponível em `http://localhost:5198` — documentação em `http://localhost:5198/api-docs`.
 
-A API sobe em `http://localhost:5198`.  
-Documentação interativa disponível em `http://localhost:5198/api-docs`.
-
-### 3. Aplicação Web
-
-Em outro terminal:
-
+**Web** (terminal 2):
 ```bash
-cd GoodHamburger.Web
-dotnet run
+cd GoodHamburger.Web && dotnet run
 ```
-
-A aplicação Blazor sobe em `http://localhost:5012`.
+Disponível em `http://localhost:5012`.
 
 ---
 
@@ -188,38 +164,34 @@ A aplicação Blazor sobe em `http://localhost:5012`.
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/orders` | Listar todos os pedidos |
-| `GET` | `/api/orders/{id}` | Buscar pedido por ID |
+| `GET` | `/api/orders?pageNumber=1&pageSize=10` | Listar pedidos (paginado) |
+| `GET` | `/api/orders/{id}` | Buscar por ID |
 | `POST` | `/api/orders` | Criar pedido |
-| `PUT` | `/api/orders/{id}` | Atualizar itens do pedido |
-| `DELETE` | `/api/orders/{id}` | Excluir pedido (apenas `Cancelled`) |
+| `PUT` | `/api/orders/{id}` | Atualizar itens |
+| `DELETE` | `/api/orders/{id}` | Excluir (apenas `Cancelled`) |
 | `PATCH` | `/api/orders/{id}/confirm` | Confirmar pedido `Pending` |
 | `PATCH` | `/api/orders/{id}/cancel` | Cancelar pedido |
-| `PATCH` | `/api/orders/{id}/status` | Avançar status na progressão |
+| `PATCH` | `/api/orders/{id}/status` | Avançar status |
 
 ### Itens de pedido `/api/order-items`
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/order-items` | Listar todos os itens |
-| `GET` | `/api/order-items/{id}` | Buscar item por ID |
-| `POST` | `/api/order-items` | Adicionar item a um pedido |
-| `PUT` | `/api/order-items/{id}` | Atualizar item |
+| `GET` | `/api/orders/{orderId}/items` | Listar itens de um pedido |
+| `POST` | `/api/order-items` | Adicionar item |
 | `DELETE` | `/api/order-items/{id}` | Remover item |
 
 ### Produtos `/api/products`
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/api/products` | Listar produtos ativos |
-| `GET` | `/api/products/{id}` | Buscar produto por ID |
+| `GET` | `/api/products?pageNumber=1&pageSize=10` | Listar produtos (paginado) |
 
 ### Categorias `/api/product-categories`
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | `GET` | `/api/product-categories` | Listar categorias |
-| `GET` | `/api/product-categories/{id}` | Buscar categoria por ID |
 
 ---
 
@@ -229,55 +201,47 @@ A aplicação Blazor sobe em `http://localhost:5012`.
 dotnet test
 ```
 
-| Projeto | Cobertura |
-|---------|-----------|
-| `GoodHamburger.Core.Tests` | `DiscountCalculatorService`, `OrderService`, `OrderItemService`, `ProductService`, `ProductCategoryService` |
+Cobertura unitária em `GoodHamburger.Core.Tests`: `DiscountCalculatorService`, `OrderService`, `OrderItemService`, `ProductService`, `ProductCategoryService`.
 
 ---
 
 ## Melhorias Não Implementadas
 
-Itens que complementariam a solução em um contexto de produção, mas que foram deixados de fora pelo escopo do desafio.
-
 ### Autenticação e Autorização
 
-Não há nenhum mecanismo de identidade na solução. Em produção seria necessário separar os perfis de acesso — por exemplo, clientes montam pedidos enquanto operadores gerenciam o status — usando **ASP.NET Core Identity** com JWT ou uma solução de identidade externa (Keycloak, Auth0).
+Sem mecanismo de identidade. Em produção seria necessário separar perfis (cliente × operador) com **ASP.NET Core Identity** + JWT ou solução externa (Keycloak, Auth0).
 
 ### Testes de Integração
 
-Os testes atuais são unitários e usam mocks. Testes de integração com banco real (usando **Testcontainers** para subir um SQL Server efêmero) dariam mais confiança nas queries EF Core, nas migrations e nas regras de banco (unique indexes, FK constraints).
-
-### Paginação
-
-O projeto já contém `GoodHamburger.Shared.Pagination` como placeholder. Em produção, endpoints como `GET /api/orders` precisariam de paginação (`page`, `pageSize`, `totalCount`) para não retornar toda a base em uma única requisição.
+Os testes atuais são unitários com mocks. Testes de integração com banco real (**Testcontainers** + SQL Server efêmero) dariam mais confiança nas queries EF Core, migrations e constraints de banco.
 
 ### Gestão de Produtos e Categorias
 
-A interface Blazor só exibe produtos — não há telas para cadastrar, editar ou desativar produtos e categorias. Isso hoje exige acesso direto ao banco ou à documentação Scalar.
+Não há telas para cadastrar, editar ou desativar produtos e categorias — isso exige acesso direto à documentação Scalar ou ao banco.
 
 ### Upload de Imagens
 
-O campo `ImageUrl` armazena uma URL externa. Uma solução completa teria upload de arquivo (para um bucket S3, Azure Blob Storage ou similar) com geração da URL após o upload, em vez de depender de links externos que podem sair do ar.
+O campo `ImageUrl` armazena uma URL externa. Uma solução completa teria upload para bucket (S3, Azure Blob) com geração da URL após o upload.
 
 ### Logs Estruturados
 
-O projeto usa o logging padrão do ASP.NET Core. Em produção, **Serilog** com saída em JSON e sink para uma plataforma centralizada (Elastic, Seq, Datadog) facilitaria rastrear erros e correlacionar requisições.
+O projeto usa o logging padrão do ASP.NET Core. Em produção, **Serilog** com saída JSON e sink para plataforma centralizada (Elastic, Seq, Datadog) facilitaria rastreio e correlação de requisições.
 
 ### Notificações em Tempo Real
 
-Mudanças de status do pedido hoje exigem que o usuário recarregue a página. **SignalR** permitiria que o frontend recebesse atualizações de status assim que o operador avançasse o pedido, sem polling.
+Mudanças de status exigem recarga manual da página. **SignalR** permitiria que o frontend recebesse atualizações sem polling.
 
 ### Cache de Respostas
 
-Endpoints de leitura estável (produtos, categorias) poderiam usar **IMemoryCache** ou **IDistributedCache** (Redis) para reduzir carga no banco em cenários de alto volume.
+Endpoints de leitura estável (produtos, categorias) se beneficiariam de **IMemoryCache** ou Redis para reduzir carga no banco.
 
 ### Pipeline de CI/CD
 
-Não há automação de build, testes e deploy. Um workflow no **GitHub Actions** rodando `dotnet build`, `dotnet test` e publicando artefatos a cada pull request garantiria que nada quebrasse silenciosamente.
+Sem automação de build/testes/deploy. Um workflow no **GitHub Actions** rodando `dotnet build` e `dotnet test` a cada pull request evitaria regressões silenciosas.
 
 ### Health Checks
 
-Expor um endpoint `/health` via `Microsoft.Extensions.Diagnostics.HealthChecks` com verificação de conectividade com o banco permitiria que orquestradores (Kubernetes, load balancers) detectem instâncias degradadas automaticamente.
+Um endpoint `/health` com `Microsoft.Extensions.Diagnostics.HealthChecks` verificando conectividade com o banco permitiria que orquestradores detectem instâncias degradadas.
 
 ---
 

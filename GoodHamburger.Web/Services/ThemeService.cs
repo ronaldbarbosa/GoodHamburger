@@ -7,7 +7,7 @@ public class ThemeService : IAsyncDisposable
     private readonly IJSRuntime _jsRuntime;
     private const string ThemeKey = "theme_preference";
     private bool _initialized;
-    private DotNetObjectReference<ThemeService>? _dotNetRef; // allows to JS call .NET code
+    private DotNetObjectReference<ThemeService>? _dotNetRef;
 
     public bool IsDarkMode { get; private set; }
     public event Action? OnThemeChanged;
@@ -67,7 +67,10 @@ public class ThemeService : IAsyncDisposable
         {
             await _jsRuntime.InvokeVoidAsync("localStorage.setItem", ThemeKey, IsDarkMode ? "dark" : "light");
         }
-        catch { }
+        catch
+        {
+            // ignored
+        }
     }
 
     public async ValueTask DisposeAsync()
