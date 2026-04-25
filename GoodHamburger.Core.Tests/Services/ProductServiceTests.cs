@@ -43,7 +43,8 @@ public class ProductServiceTests
         };
 
         _categoryRepositoryMock.Setup(c => c.GetByIdAsync(1)).ReturnsAsync(category);
-        _productRepositoryMock.Setup(r => r.AddAsync(It.IsAny<Product>())).ReturnsAsync((Product p) => p);
+        _productRepositoryMock.Setup(r => r.AddAsync(It.IsAny<Product>(), It.IsAny<CancellationToken>()))
+            .Returns<Product, CancellationToken>((p, _) => Task.FromResult(p));
 
         var result = await _productService.CreateAsync(product);
 
