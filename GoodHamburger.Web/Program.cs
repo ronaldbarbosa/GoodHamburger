@@ -16,6 +16,7 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<ProductCategoryService>();
 builder.Services.AddScoped<CartService>();
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5198") });
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5198";
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiBaseUrl) });
 
 await builder.Build().RunAsync();
