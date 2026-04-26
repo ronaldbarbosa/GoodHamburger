@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoodHamburger.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260424170806_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260426174920_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -141,7 +141,7 @@ namespace GoodHamburger.Data.Migrations
                             ImageUrl = "https://img77.uenicdn.com/image/upload/v1616473574/business/74412a32-557c-424b-9a43-2dfd3c8a01ab.jpg",
                             IsActive = true,
                             Name = "X-Burger",
-                            Price = 15.00m
+                            Price = 5.00m
                         },
                         new
                         {
@@ -151,7 +151,7 @@ namespace GoodHamburger.Data.Migrations
                             ImageUrl = "https://paulinlanches.pedidoturbo.com.br/_core/_uploads/129/2023/01/1648240123i0iafc9kji.jpeg",
                             IsActive = true,
                             Name = "X-Egg",
-                            Price = 17.00m
+                            Price = 4.50m
                         },
                         new
                         {
@@ -161,7 +161,7 @@ namespace GoodHamburger.Data.Migrations
                             ImageUrl = "https://imagens.jotaja.com/produtos/2607/8845691EA121444DA9B3A15705E0F7CEC7DDCC8D53ABC58CFC044C87711E87EF.jpeg",
                             IsActive = true,
                             Name = "X-Bacon",
-                            Price = 19.00m
+                            Price = 7.00m
                         },
                         new
                         {
@@ -171,7 +171,7 @@ namespace GoodHamburger.Data.Migrations
                             ImageUrl = "https://latourangelle.com/cdn/shop/articles/hikynvl8pjkjqhvpnok6_1200x.jpg?v=1619198610",
                             IsActive = true,
                             Name = "Batata Frita",
-                            Price = 10.00m
+                            Price = 2.00m
                         },
                         new
                         {
@@ -181,7 +181,7 @@ namespace GoodHamburger.Data.Migrations
                             ImageUrl = "https://hortifrutibr.vtexassets.com/arquivos/ids/173841/Refrigerante-Coca-Cola-Lata-350ml-gelada.jpg.jpg?v=638931057551370000",
                             IsActive = true,
                             Name = "Refrigerante",
-                            Price = 5.00m
+                            Price = 2.50m
                         });
                 });
 

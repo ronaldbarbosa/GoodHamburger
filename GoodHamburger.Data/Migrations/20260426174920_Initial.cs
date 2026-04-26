@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GoodHamburger.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -111,11 +111,11 @@ namespace GoodHamburger.Data.Migrations
                 columns: new[] { "Id", "CategoryId", "CreatedAt", "ImageUrl", "IsActive", "Name", "Price" },
                 values: new object[,]
                 {
-                    { 1, 1, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), "https://img77.uenicdn.com/image/upload/v1616473574/business/74412a32-557c-424b-9a43-2dfd3c8a01ab.jpg", true, "X-Burger", 15.00m },
-                    { 2, 1, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), "https://paulinlanches.pedidoturbo.com.br/_core/_uploads/129/2023/01/1648240123i0iafc9kji.jpeg", true, "X-Egg", 17.00m },
-                    { 3, 1, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), "https://imagens.jotaja.com/produtos/2607/8845691EA121444DA9B3A15705E0F7CEC7DDCC8D53ABC58CFC044C87711E87EF.jpeg", true, "X-Bacon", 19.00m },
-                    { 4, 2, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), "https://latourangelle.com/cdn/shop/articles/hikynvl8pjkjqhvpnok6_1200x.jpg?v=1619198610", true, "Batata Frita", 10.00m },
-                    { 5, 3, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), "https://hortifrutibr.vtexassets.com/arquivos/ids/173841/Refrigerante-Coca-Cola-Lata-350ml-gelada.jpg.jpg?v=638931057551370000", true, "Refrigerante", 5.00m }
+                    { 1, 1, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), "https://img77.uenicdn.com/image/upload/v1616473574/business/74412a32-557c-424b-9a43-2dfd3c8a01ab.jpg", true, "X-Burger", 5.00m },
+                    { 2, 1, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), "https://paulinlanches.pedidoturbo.com.br/_core/_uploads/129/2023/01/1648240123i0iafc9kji.jpeg", true, "X-Egg", 4.50m },
+                    { 3, 1, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), "https://imagens.jotaja.com/produtos/2607/8845691EA121444DA9B3A15705E0F7CEC7DDCC8D53ABC58CFC044C87711E87EF.jpeg", true, "X-Bacon", 7.00m },
+                    { 4, 2, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), "https://latourangelle.com/cdn/shop/articles/hikynvl8pjkjqhvpnok6_1200x.jpg?v=1619198610", true, "Batata Frita", 2.00m },
+                    { 5, 3, new DateTime(2026, 4, 21, 17, 0, 0, 0, DateTimeKind.Unspecified), "https://hortifrutibr.vtexassets.com/arquivos/ids/173841/Refrigerante-Coca-Cola-Lata-350ml-gelada.jpg.jpg?v=638931057551370000", true, "Refrigerante", 2.50m }
                 });
 
             migrationBuilder.CreateIndex(
