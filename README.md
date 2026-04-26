@@ -29,7 +29,7 @@ Sistema de pedidos de uma hamburgueria, desenvolvido como desafio técnico. Perm
 | Validação | FluentValidation 12 |
 | Documentação | Scalar (OpenAPI) |
 | Testes | xUnit + Moq |
-| Infraestrutura | Docker + Docker Compose |
+| Infraestrutura | Docker + Docker Compose + nginx |
 
 ---
 
@@ -113,7 +113,7 @@ O `CartService` mantém o estado do carrinho em memória. Ao inicializar, busca 
 
 ### 🐳 Docker (recomendado)
 
-**Pré-requisito:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) ou Docker Engine + Compose plugin.
+**Pré-requisito:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) ou Docker Engine + Compose plugin (**Docker Compose V2** — comando `docker compose`, sem hífen).
 
 ```bash
 docker compose up --build
@@ -126,6 +126,8 @@ O Compose sobe três serviços automaticamente:
 | `sqlserver` | SQL Server 2022 | `localhost:1433` |
 | `api` | ASP.NET Core Minimal API | `http://localhost:5198` |
 | `web` | Blazor WASM via nginx | `http://localhost` |
+
+O frontend Blazor WebAssembly é uma aplicação estática (HTML + JS). No container `web`, o **nginx** serve esses arquivos e aplica um fallback para `index.html` em qualquer rota, garantindo que o roteamento client-side do Blazor funcione corretamente.
 
 > As migrations são aplicadas automaticamente na inicialização da API.
 

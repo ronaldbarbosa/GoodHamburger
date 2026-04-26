@@ -48,7 +48,11 @@
     }
 </MudGrid>
 
-@if (!filteredProducts.Any())
+@if (isLoading)
+{
+    <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-4" />
+}
+else if (!filteredProducts.Any())
 {
     <MudText Class="mt-4">Nenhum produto encontrado.</MudText>
 }
@@ -58,12 +62,14 @@
     private List<ProductResponse> filteredProducts = [];
     private List<ProductCategoryResponse> categories = [];
     private int? selectedCategoryId;
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
         products = await ProductService.GetAllAsync();
         categories = await ProductCategoryService.GetAllAsync();
         filteredProducts = products;
+        isLoading = false;
         CartService.OnCartChanged += StateHasChanged;
     }
 
