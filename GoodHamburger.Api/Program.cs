@@ -1,6 +1,8 @@
 using GoodHamburger.Api.Endpoints;
 using GoodHamburger.Api.IoC;
 using GoodHamburger.Api.Middleware;
+using GoodHamburger.Data.Context;
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,14 +20,16 @@ builder.Services.RegisterServices(builder.Configuration);
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference("/api-docs", options =>
-    {
-        options.WithTitle("API Good Hamburger - Documentação");
-    });
+    scope.ServiceProvider.GetRequiredService<DataContext>().Database.Migrate();
 }
+
+app.MapOpenApi();
+app.MapScalarApiReference("/api/docs", options =>
+{
+    options.WithTitle("API Good Hamburger - Documentação");
+});
 
 app.UseCors("AllowBlazor");
 app.UseGlobalExceptionHandler();

@@ -6,33 +6,34 @@ Sistema de pedidos de uma hamburgueria, desenvolvido como desafio técnico. Perm
 
 ## Sumário
 
-- [Tecnologias](#tecnologias)
-- [Decisões de Arquitetura](#decisões-de-arquitetura)
-- [Regras de Negócio](#regras-de-negócio)
-- [Pré-requisitos](#pré-requisitos)
-- [Configuração](#configuração)
-- [Como Executar](#como-executar)
-- [Endpoints da API](#endpoints-da-api)
-- [Testes](#testes)
-- [Melhorias Não Implementadas](#melhorias-não-implementadas)
+- [🛠 Tecnologias](#-tecnologias)
+- [🏗 Decisões de Arquitetura](#-decisões-de-arquitetura)
+- [📋 Regras de Negócio](#-regras-de-negócio)
+- [🚀 Como Executar](#-como-executar)
+  - [🐳 Docker (recomendado)](#-docker-recomendado)
+  - [💻 Local](#-local)
+- [📡 Endpoints da API](#-endpoints-da-api)
+- [🧪 Testes](#-testes)
+- [💡 Melhorias Não Implementadas](#-melhorias-não-implementadas)
 
 ---
 
-## Tecnologias
+## 🛠 Tecnologias
 
 | Camada | Tecnologia |
 |--------|-----------|
 | Backend | ASP.NET Core 10 (Minimal API) |
 | Frontend | Blazor WebAssembly 10 + MudBlazor 9 |
 | ORM | Entity Framework Core 10 |
-| Banco de dados | SQL Server |
+| Banco de dados | SQL Server 2022 |
 | Validação | FluentValidation 12 |
 | Documentação | Scalar (OpenAPI) |
 | Testes | xUnit + Moq |
+| Infraestrutura | Docker + Docker Compose |
 
 ---
 
-## Decisões de Arquitetura
+## 🏗 Decisões de Arquitetura
 
 ### Clean Architecture em camadas
 
@@ -47,15 +48,7 @@ Web (Blazor) ──► Api ──► Core ◄── Data
 
 ### Minimal API
 
-Endpoints organizados em classes estáticas com método `Handle`, mantendo cada operação isolada:
-
-```
-Api/Endpoints/
-  OrderEndpoints/      GetOrders  GetOrder  PostOrder  UpdateOrder
-                       DeleteOrder  CancelOrder  ConfirmOrder  UpdateOrderStatus
-  OrderItemEndpoints/  GetOrderItems  GetOrderItem  PostOrderItem  UpdateOrderItem  DeleteOrderItem
-  ProductEndpoints/    GetProducts  GetProduct
-```
+Endpoints organizados em classes estáticas com método `Handle`, mantendo cada operação isolada.
 
 ### Repository + Unit of Work
 
@@ -96,7 +89,7 @@ O `CartService` mantém o estado do carrinho em memória. Ao inicializar, busca 
 
 ---
 
-## Regras de Negócio
+## 📋 Regras de Negócio
 
 ### Descontos automáticos
 
@@ -116,16 +109,54 @@ O `CartService` mantém o estado do carrinho em memória. Ao inicializar, busca 
 
 ---
 
-## Pré-requisitos
+## 🚀 Como Executar
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
-- SQL Server em `localhost,1433` (usuário `sa`, senha configurada no `appsettings.Development.json`)
+### 🐳 Docker (recomendado)
+
+**Pré-requisito:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) ou Docker Engine + Compose plugin.
+
+```bash
+docker compose up --build
+```
+
+O Compose sobe três serviços automaticamente:
+
+| Serviço | Descrição | URL |
+|---------|-----------|-----|
+| `sqlserver` | SQL Server 2022 | `localhost:1433` |
+| `api` | ASP.NET Core Minimal API | `http://localhost:5198` |
+| `web` | Blazor WASM via nginx | `http://localhost` |
+
+> As migrations são aplicadas automaticamente na inicialização da API.
+
+**URLs de acesso:**
+
+| O quê | URL |
+|-------|-----|
+| Frontend | `http://localhost` |
+| Documentação da API (Scalar) | `http://localhost:5198/api/docs` |
+
+Para encerrar:
+
+```bash
+docker compose down
+```
+
+Para limpar também os volumes (banco de dados):
+
+```bash
+docker compose down -v
+```
 
 ---
 
-## Configuração
+### 💻 Local
 
-Edite `GoodHamburger.Api/appsettings.Development.json`:
+**Pré-requisitos:**
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- SQL Server em `localhost,1433`
+
+**1. Configure a connection string** em `GoodHamburger.Api/appsettings.Development.json`:
 
 ```json
 {
@@ -135,30 +166,33 @@ Edite `GoodHamburger.Api/appsettings.Development.json`:
 }
 ```
 
----
-
-## Como Executar
+**2. Restaure os pacotes e aplique as migrations:**
 
 ```bash
 dotnet restore
 dotnet ef database update --project GoodHamburger.Data --startup-project GoodHamburger.Api
 ```
 
-**API** (terminal 1):
+**3. Suba os projetos em terminais separados:**
+
 ```bash
+# Terminal 1 — API
 cd GoodHamburger.Api && dotnet run
 ```
-Disponível em `http://localhost:5198` — documentação em `http://localhost:5198/api-docs`.
 
-**Web** (terminal 2):
 ```bash
+# Terminal 2 — Frontend
 cd GoodHamburger.Web && dotnet run
 ```
-Disponível em `http://localhost:5012`.
+
+| O quê | URL |
+|-------|-----|
+| Frontend | `http://localhost:5012` |
+| Documentação da API (Scalar) | `http://localhost:5198/api/docs` |
 
 ---
 
-## Endpoints da API
+## 📡 Endpoints da API
 
 ### Pedidos `/api/orders`
 
@@ -195,7 +229,7 @@ Disponível em `http://localhost:5012`.
 
 ---
 
-## Testes
+## 🧪 Testes
 
 ```bash
 dotnet test
@@ -205,43 +239,43 @@ Cobertura unitária em `GoodHamburger.Core.Tests`: `DiscountCalculatorService`, 
 
 ---
 
-## Melhorias Não Implementadas
+## 💡 Melhorias Não Implementadas
 
-### Autenticação e Autorização
+### 🔐 Autenticação e Autorização
 
 Sem mecanismo de identidade. Em produção seria necessário separar perfis (cliente × operador) com **ASP.NET Core Identity** + JWT ou solução externa (Keycloak, Auth0).
 
-### Testes de Integração
+### 🧩 Testes de Integração
 
 Os testes atuais são unitários com mocks. Testes de integração com banco real (**Testcontainers** + SQL Server efêmero) dariam mais confiança nas queries EF Core, migrations e constraints de banco.
 
-### Gestão de Produtos e Categorias
+### 📦 Gestão de Produtos e Categorias
 
-Não há telas para cadastrar, editar ou desativar produtos e categorias — isso exige acesso direto à documentação Scalar ou ao banco.
+Não há opções para cadastrar, editar ou desativar produtos e categorias — isso exige acesso ao banco.
 
-### Upload de Imagens
+### 🖼 Upload de Imagens
 
 O campo `ImageUrl` armazena uma URL externa. Uma solução completa teria upload para bucket (S3, Azure Blob) com geração da URL após o upload.
 
-### Logs Estruturados
+### 📝 Logs Estruturados
 
 O projeto usa o logging padrão do ASP.NET Core. Em produção, **Serilog** com saída JSON e sink para plataforma centralizada (Elastic, Seq, Datadog) facilitaria rastreio e correlação de requisições.
 
-### Notificações em Tempo Real
+### 🔔 Notificações em Tempo Real
 
 Mudanças de status exigem recarga manual da página. **SignalR** permitiria que o frontend recebesse atualizações sem polling.
 
-### Cache de Respostas
+### ⚡ Cache de Respostas
 
 Endpoints de leitura estável (produtos, categorias) se beneficiariam de **IMemoryCache** ou Redis para reduzir carga no banco.
 
-### Pipeline de CI/CD
+### ⚙️ Pipeline de CI/CD
 
 Sem automação de build/testes/deploy. Um workflow no **GitHub Actions** rodando `dotnet build` e `dotnet test` a cada pull request evitaria regressões silenciosas.
 
-### Health Checks
+### 🩺 Health Checks
 
-Um endpoint `/health` com `Microsoft.Extensions.Diagnostics.HealthChecks` verificando conectividade com o banco permitiria que orquestradores detectem instâncias degradadas.
+Um endpoint `/health` com `Microsoft.Extensions.Diagnostics.HealthChecks` verificando conectividade com o banco permitiria que orquestradores (como o próprio Docker Compose) detectem instâncias degradadas e reiniciem automaticamente.
 
 ---
 
